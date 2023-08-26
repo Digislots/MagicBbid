@@ -1,6 +1,10 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id ("kotlin-android")
+    id ("maven-publish")
+
+
 }
 
 android {
@@ -23,6 +27,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -64,4 +69,19 @@ dependencies {
     val multidex_version = "2.0.1"
     implementation("androidx.multidex:multidex:$multidex_version")
     implementation ("com.google.code.gson:gson:2.8.9")
+}
+publishing {
+    publications {
+
+        create<MavenPublication>("maven") {
+
+            groupId = "com.example.mylibrary"
+            artifactId = "magicbid"
+            version = "1.1"
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar") // this is the solution I came up with
+             
+
+            //from(components["java"])
+        }
+    }
 }

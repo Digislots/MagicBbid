@@ -72,16 +72,23 @@ dependencies {
 }
 publishing {
     publications {
-
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("ReleaseAar") {
+            groupId = "com.example.mylibrary"
+            artifactId = "magicbid"
+            version = "1.2"
+            afterEvaluate {
+                artifact(tasks.getByName("bundleReleaseAar"))
+            }
+            /* create<MavenPublication>("maven") {
 
             groupId = "com.example.mylibrary"
             artifactId = "magicbid"
             version = "1.1"
             artifact("$buildDir/outputs/aar/${project.name}-release.aar") // this is the solution I came up with
-             
 
-            //from(components["java"])
+
+            from(components["java"])
+        */
         }
     }
 }

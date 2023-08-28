@@ -37,7 +37,6 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         super.onCreate()
         registerActivityLifecycleCallbacks(this)
 
-        Log.d(LOG_TAG, "Google Mobile Ads SDK Version: " + MobileAds.getVersion())
 
         MobileAds.initialize(this) {}
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)

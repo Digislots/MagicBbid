@@ -15,7 +15,9 @@
             android:exported="true"/>
         <activity android:name="com.magicbid.app.Interstital" />
 
-
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6683051613977291~5947357131" />
     </application>
 
 

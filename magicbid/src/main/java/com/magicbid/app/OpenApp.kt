@@ -1,14 +1,12 @@
 package com.magicbid.app
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mylibrary.R
 
-class SplashActivity : AppCompatActivity() {
+class OpenApp : AppCompatActivity() {
 
     private var secondsRemaining: Long = 0L
     lateinit var next : TextView
@@ -57,7 +55,7 @@ class SplashActivity : AppCompatActivity() {
 
                 // Show the app open ad.
                 application.showAdIfAvailable(
-                    this@SplashActivity,
+                    this@OpenApp,
                     object : App.OnShowAdCompleteListener {
                         override fun onShowAdComplete() {
                             //startMainActivity()

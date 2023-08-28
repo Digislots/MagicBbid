@@ -11,7 +11,7 @@
             android:name="com.magicbid.app.NewAct"
             android:exported="true"/>
         <activity
-            android:name="com.magicbid.app.SplashActivity"
+            android:name="com.magicbid.app.OpenApp"
             android:exported="true"/>
         <activity android:name="com.magicbid.app.Interstital" />
 

@@ -9,14 +9,12 @@ import com.example.mylibrary.R
 class OpenApp : AppCompatActivity() {
 
     private var secondsRemaining: Long = 0L
-    lateinit var next : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+        setContentView(R.layout.activity_open_)
 
-        next = findViewById(R.id.next)
-//        next.setOnClickListener{
+ //        next.setOnClickListener{
 //            val intent = Intent(this, MainActivity::class.java)
 //            startActivity(intent)
 //

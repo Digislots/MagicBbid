@@ -39,7 +39,7 @@ class BannerAD : AppCompatActivity() {
             if (!initialLayoutComplete) {
                 initialLayoutComplete = true
                 //  loadBanner()
-                val result = SharedPrefs.getResponseAll(applicationContext)
+                val result = Prefs.getResponseAll(applicationContext)
                 var maxCpm = 0
                 var maxCpmAdscode = ""
                 if (result != null) {

@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.multidex.MultiDexApplication
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -54,7 +53,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                         try {
                             val result = res.body()?.adscode
 
-                            SharedPrefs.setResponseAll(applicationContext, result)
+                            Prefs.setResponseAll(applicationContext, result)
 
 
                             var maxCpm = 0
@@ -179,7 +178,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
 
 
-            val result =  SharedPrefs.getResponseAll(applicationContext)
+            val result =  Prefs.getResponseAll(applicationContext)
             var maxCpm = 0
             var maxCpmAdscode =""
 

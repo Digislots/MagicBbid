@@ -44,7 +44,7 @@ class NativeAD : AppCompatActivity() {
     private fun getInformation() {
 
 
-        val result = SharedPrefs.getResponseAll(applicationContext)
+        val result = Prefs.getResponseAll(applicationContext)
         var maxCpm = 0
         var maxCpmAdscode = ""
         if (result != null) {

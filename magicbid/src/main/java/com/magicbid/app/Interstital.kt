@@ -1,6 +1,5 @@
 package com.magicbid.app
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -35,7 +34,7 @@ class Interstital : AppCompatActivity() {
     private fun getInformation() {
 
 
-        val result = SharedPrefs.getResponseAll(applicationContext)
+        val result = Prefs.getResponseAll(applicationContext)
         var maxCpm = 0
         var maxCpmAdscode = ""
         if (result != null) {

@@ -6,34 +6,55 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import com.magicbid.app.BannerAD
 import com.magicbid.app.Interstital
+import com.magicbid.app.NativeAD
 import com.magicbid.app.OpenApp
+import com.magicbid.app.RewardedAD
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        findViewById<TextView>(R.id.text5).setOnClickListener(View.OnClickListener {
+
+        findViewById<TextView>(R.id.openapp).setOnClickListener{
             startActivity(Intent(this, OpenApp::class.java))
-            /*   val app=App()
-                app.showAdIfAvailable(this, object : OnShowAdCompleteListener {
-                    override fun onShowAdComplete() {
-                        Log.e("my app", "OnShowAdCompleteListener")
-                    }
-                })
-    */
-            Toast.makeText(this, "test", Toast.LENGTH_LONG).show()
-        })
-        findViewById<TextView>(R.id.textnext).setOnClickListener(View.OnClickListener {
+
+
+            // startActivity(Intent(this, Interstital::class.java))
+
+        }
+
+        findViewById<TextView>(R.id.banner).setOnClickListener{
+            startActivity(Intent(this, BannerAD::class.java))
+
+
+            // startActivity(Intent(this, Interstital::class.java))
+
+        }
+
+        findViewById<TextView>(R.id.interstital).setOnClickListener{
             startActivity(Intent(this, Interstital::class.java))
-            /*   val app=App()
-                app.showAdIfAvailable(this, object : OnShowAdCompleteListener {
-                    override fun onShowAdComplete() {
-                        Log.e("my app", "OnShowAdCompleteListener")
-                    }
-                })
-    */
-            Toast.makeText(this, "test", Toast.LENGTH_LONG).show()
-        })
+
+
+            // startActivity(Intent(this, Interstital::class.java))
+
+        }
+
+        findViewById<TextView>(R.id.nativead).setOnClickListener{
+            startActivity(Intent(this, NativeAD::class.java))
+
+
+            // startActivity(Intent(this, Interstital::class.java))
+
+        }
+
+        findViewById<TextView>(R.id.rewarded).setOnClickListener{
+            startActivity(Intent(this, RewardedAD::class.java))
+
+
+            // startActivity(Intent(this, Interstital::class.java))
+
+        }
     }
 }

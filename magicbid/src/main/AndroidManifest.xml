@@ -17,12 +17,6 @@
         <activity android:name="com.magicbid.app.RewardedAD" />
 
 
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5390573296880593~3502876831" />
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-6683051613977291~5947357131" />-->
 
 
     </application>

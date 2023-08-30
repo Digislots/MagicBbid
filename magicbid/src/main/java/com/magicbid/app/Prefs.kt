@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
 
 object Prefs {
 
@@ -34,6 +33,16 @@ object Prefs {
 
         return null
     }
+
+    fun clearAll(context: Context) {
+        val sharedPref = context.getSharedPreferences("UserType", AppCompatActivity.MODE_PRIVATE)
+        sharedPref.edit().clear().apply()
+
+
+
+
+    }
+
 
 
 

@@ -53,6 +53,7 @@ class BannerAD : AppCompatActivity() {
                                     adView.setAdSize(adSize)
                                     val adRequest = AdRequest.Builder().build()
                                     adView.loadAd(adRequest)
+                                   // onBackPressed()
 
 //                                        if (!adRequest.zza().zzl().isEmpty()) {
 //

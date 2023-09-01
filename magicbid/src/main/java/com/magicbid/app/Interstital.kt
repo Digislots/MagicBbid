@@ -2,6 +2,7 @@ package com.magicbid.app
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mylibrary.databinding.CardViewDesignBinding
 import com.google.android.gms.ads.AdRequest
@@ -48,7 +49,8 @@ class Interstital : AppCompatActivity() {
                             var mInterstitialAd: InterstitialAd? = null
 
                             var adRequest = AdRequest.Builder().build()
-
+                            var isOpen = false
+                            Toast.makeText(this@Interstital, "Ads loading ...", Toast.LENGTH_SHORT).show()
                             InterstitialAd.load(
                                 this@Interstital,
                                 maxCpmAdscode,
@@ -57,6 +59,7 @@ class Interstital : AppCompatActivity() {
                                     override fun onAdFailedToLoad(adError: LoadAdError) {
 
                                         mInterstitialAd = null
+                                        Toast.makeText(this@Interstital, "ads not loaded", Toast.LENGTH_SHORT).show()
                                     }
 
                                     override fun onAdLoaded(interstitialAd: InterstitialAd) {
@@ -64,6 +67,10 @@ class Interstital : AppCompatActivity() {
                                         mInterstitialAd = interstitialAd
                                         if (mInterstitialAd != null) {
                                             mInterstitialAd?.show(this@Interstital)
+                                            isOpen = true
+
+                                            onBackPressed()
+
                                         } else {
                                             Log.d("TAG", "The interstitial ad wasn't ready yet.")
                                         }

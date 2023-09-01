@@ -200,15 +200,14 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                                         isLoadingAd = false
                                         loadTime = Date().time
                                         Log.d(LOG_TAG, "onAdLoaded.")
-                                        Toast.makeText(context, "onAdLoaded", Toast.LENGTH_SHORT).show()
+                                        //Toast.makeText(context, "onAdLoaded", Toast.LENGTH_SHORT).show()
                                     }
 
 
                                     override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                                         isLoadingAd = false
                                         Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
-                                        Toast.makeText(context, "onAdFailedToLoad", Toast.LENGTH_SHORT).show()
-                                    }
+                                     }
                                 }
                             )
 

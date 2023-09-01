@@ -55,6 +55,7 @@ dependencies {
     implementation ("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
 
+
     implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 

@@ -6,7 +6,7 @@ import retrofit2.http.GET
 interface ApiInterface {
 
 
-    @GET("/api/getAds/TTS12345")
+    @GET("/api/getAds/TTS123456")
     suspend fun getApptomative(
 
     ): Response<MagicbidResponse>

@@ -115,13 +115,7 @@ class NativeAD : AppCompatActivity() {
            domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}
           """"
                     binding.refreshButton.isEnabled = true
-                    Toast.makeText(
-                        this@NativeAD,
-                        "Failed to load native ad with error $error",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
+                 }
             }
             )
                 .build()

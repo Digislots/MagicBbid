@@ -14,6 +14,8 @@ class BannerAD : AppCompatActivity() {
     private lateinit var binding: BannerAdBinding
     private lateinit var adView: AdView
     private var initialLayoutComplete = false
+    var result: List<Adscode>? = null
+    var maxCpm = 0
     private val adSize: AdSize
         get() {
             val display = windowManager.defaultDisplay
@@ -39,46 +41,44 @@ class BannerAD : AppCompatActivity() {
             if (!initialLayoutComplete) {
                 initialLayoutComplete = true
                 //  loadBanner()
-                val result = Prefs.getResponseAll(applicationContext)
-                var maxCpm = 0
-                var maxCpmAdscode = ""
+
+                //Getting Data from SP and storing in result
+                result = Prefs.getResponseAll(applicationContext)
+
+                //Sorting Decending order 5,4,3, by cpm
+
                 if (result != null) {
-                    try {
-                        for (ads in result) {
-                            if (ads.ads_type == 1) {
-                                if (ads.cpm > maxCpm) {
-                                    maxCpm = ads.cpm.toInt()
-                                    maxCpmAdscode = ads.adscode
-                                    adView.adUnitId = maxCpmAdscode
-                                    adView.setAdSize(adSize)
-                                    val adRequest = AdRequest.Builder().build()
-                                    adView.loadAd(adRequest)
-                                   // onBackPressed()
+                    for (ads in result!!) {
+                        try {
+                            if (ads.ads_type == 2) {
 
-//                                        if (!adRequest.zza().zzl().isEmpty()) {
-//
-//
-//                                        } else {
-//                                            Toast.makeText(this@MainActivity, "No add", Toast.LENGTH_SHORT).show()
-//
-//                                        }
+//                        Collections.sort(result, Comparator<Adscode> { obj1, obj2 ->
+//                            return@Comparator obj2.cpm.compareTo(obj1.cpm)
+//                        })
 
-                                }
+                                //get adscode by position
+                                loadAd(result!![maxCpm].adscode)
                             }
+                        } catch (e: Exception) {
+                            Log.d("dvbvb", e.toString())
                         }
-
-                    } catch (e: Exception) {
-                        Log.d("dvbvb", e.toString())
                     }
                 }
 
+
             }
         }
-//        binding.next.setOnClickListener {
-//            startActivity(Intent(this, RewardedinterstitialAd::class.java))
-//
-//        }
     }
 
+    private fun loadAd(adscode: String) {
+        adView.adUnitId = adscode
+        adView.setAdSize(adSize)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
+        // onBackPressed()
 
+
+    }
 }
+
+

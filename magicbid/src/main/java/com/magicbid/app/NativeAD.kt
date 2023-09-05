@@ -21,7 +21,11 @@ import com.google.android.gms.ads.nativead.NativeAdOptions
 class NativeAD : AppCompatActivity() {
     private lateinit var binding: NativeAdBinding
     private var currentNativeAd: NativeAd? = null
+    var result: List<Adscode>? = null
 
+    //private lateinit var result : ArrayList<Adscode> //Add POJO class type
+    // var maxCpmAdscode = ""
+    var maxCpm = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = NativeAdBinding.inflate(layoutInflater)
@@ -43,33 +47,56 @@ class NativeAD : AppCompatActivity() {
 
     private fun getInformation() {
 
+        //Getting Data from SP and storing in result
+        result = Prefs.getResponseAll(applicationContext)
 
-        val result = Prefs.getResponseAll(applicationContext)
-        var maxCpm = 0
-        var maxCpmAdscode = ""
+        //Sorting Decending order 5,4,3, by cpm
+
         if (result != null) {
-
-
-            for (ads in result) {
+            for (ads in result!!) {
                 try {
                     if (ads.ads_type == 4) {
-                        if (ads.cpm > maxCpm) {
-                            maxCpm = ads.cpm.toInt()
-                            maxCpmAdscode = ads.adscode
-                            refreshAd(maxCpmAdscode)
-                            binding.refreshButton.setOnClickListener { refreshAd(maxCpmAdscode) }
-                        }
-                    }
 
+//                        Collections.sort(result, Comparator<Adscode> { obj1, obj2 ->
+//                            return@Comparator obj2.cpm.compareTo(obj1.cpm)
+//                        })
+
+                        //get adscode by position
+                        refreshAd(result!!.get(maxCpm).adscode)
+                    }
                 } catch (e: Exception) {
                     Log.d("dvbvb", e.toString())
                 }
-
-
             }
-
-
         }
+
+//
+//        val result = Prefs.getResponseAll(applicationContext)
+//        var maxCpm = 0
+//        var maxCpmAdscode = ""
+//        if (result != null) {
+//
+//
+//            for (ads in result) {
+//                try {
+//                    if (ads.ads_type == 4) {
+//                        if (ads.cpm > maxCpm) {
+//                            maxCpm = ads.cpm.toInt()
+//                            maxCpmAdscode = ads.adscode
+//                            refreshAd(maxCpmAdscode)
+//                            binding.refreshButton.setOnClickListener { refreshAd(maxCpmAdscode) }
+//                        }
+//                    }
+//
+//                } catch (e: Exception) {
+//                    Log.d("dvbvb", e.toString())
+//                }
+//
+//
+//            }
+//
+//
+//        }
 
 
     }
@@ -115,6 +142,14 @@ class NativeAD : AppCompatActivity() {
            domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}
           """"
                     binding.refreshButton.isEnabled = true
+                    if (loadAdError.message == "No fill."){
+
+                        //IF NO add increase maxCpm by 1 or ++1
+                        maxCpm++
+
+                        //calling same function with updated adscode
+                        result?.get(maxCpm)?.let { refreshAd(it.adscode) }
+                    }
                  }
             }
             )

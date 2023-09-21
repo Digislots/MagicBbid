@@ -1,12 +1,15 @@
 package com.magicbid.app
 
-import android.app.Application
-import android.util.Log
 import android.app.Activity
-
+import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.widget.Toast
+import android.text.format.Formatter
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -21,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Date
 
 
@@ -32,9 +36,11 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     private lateinit var appOpenAdManager: AppOpenAdManager
     private var currentActivity: Activity? = null
 
+
     override fun onCreate() {
         super.onCreate()
         registerActivityLifecycleCallbacks(this)
+
 
 
         MobileAds.initialize(this) {}
@@ -42,42 +48,31 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         appOpenAdManager = AppOpenAdManager()
 
 
+        val ai: ApplicationInfo = applicationContext.packageManager
+            .getApplicationInfo(applicationContext.packageName, PackageManager.GET_META_DATA)
+        val value = ai.metaData["token"]
 
         CoroutineScope(Dispatchers.IO).launch {
 
 
             try {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val res = ApiUtilities.getApiInterface()!!.getApptomative()
+                    val res = ApiUtilities.getApiInterface()!!.getApptomative(value)
                     withContext(Dispatchers.Main) {
                         try {
                             val result = res.body()?.adscode
+                            Prefs.setResponseAll(applicationContext,result)
 
-                            Prefs.setResponseAll(applicationContext, result)
-
-
-                            var maxCpm = 0
-                            val pubappid = res.body()?.publisherid
-                            var appIid = ""
-
+//
+//                            val pubappid = res.body()?.publisherid
+//                            var appIid =
+//
 //                            if (pubappid != null) {
 //                                for (adscode in pubappid) {
 //                                    appIid = adscode.app_code
 //
-//                                    Constant.AppId = appIid
+//                                    Prefs.setAppid(applicationContext,appIid)
 //
-//
-//                                    try {
-//                                        val applicationInfo = packageManager.getApplicationInfo(
-//                                            packageName, PackageManager.GET_META_DATA)
-//                                        applicationInfo.metaData.putString(
-//                                            "com.google.android.gms.ads.APPLICATION_ID",
-//                                            appIid)
-//                                        Log.d("dvbvb", appIid)
-//
-//                                    } catch (e: PackageManager.NameNotFoundException) {
-//                                        e.printStackTrace()
-//                                    }
 //                                }
 //
 //
@@ -139,6 +134,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
      * @param activity the activity that shows the app open ad
      * @param onShowAdCompleteListener the listener to be notified when an app open ad is complete
      */
+
     fun showAdIfAvailable(activity: Activity, onShowAdCompleteListener: OnShowAdCompleteListener) {
         // We wrap the showAdIfAvailable to enforce that other classes only interact with MyApplication
         // class.
@@ -200,7 +196,39 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                                         isLoadingAd = false
                                         loadTime = Date().time
                                         Log.d(LOG_TAG, "onAdLoaded.")
-                                        //Toast.makeText(context, "onAdLoaded", Toast.LENGTH_SHORT).show()
+
+
+                                        val formatter = SimpleDateFormat("yyyy-MM-dd")
+                                        val date = Date()
+                                        val currentdate = formatter.format(date)
+
+
+                                        val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                                        val ipAddress: String = Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
+
+                                        val ai: ApplicationInfo = context.packageManager
+                                                .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                                            val app_id = ai.metaData["com.google.android.gms.ads.APPLICATION_ID"]
+
+                                            try {
+                                                CoroutineScope(Dispatchers.IO).launch {
+                                                    val res = ApiUtilities.getApiInterface()!!
+                                                        .postData(ipAddress, app_id, maxCpmAdscode, currentdate)
+                                                    withContext(Dispatchers.Main) {
+                                                        try {
+                                                            res.body().toString()
+                                                        } catch (e: Exception) {
+                                                            Log.d("dvbvb", e.toString())
+                                                        }
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.d("dvbvb", e.toString())
+
+                                            }
+
+
+
                                     }
 
 
@@ -220,24 +248,6 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
 
 
-//            val request = AdRequest.Builder().build()
-//            AppOpenAd.load(context, AD_UNIT_ID, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, object : AppOpenAd.AppOpenAdLoadCallback() {
-//
-//                    override fun onAdLoaded(ad: AppOpenAd) {
-//                        appOpenAd = ad
-//                        isLoadingAd = false
-//                        loadTime = Date().time
-//                        Log.d(LOG_TAG, "onAdLoaded.")
-//                        Toast.makeText(context, "onAdLoaded", Toast.LENGTH_SHORT).show()
-//                    }
-//
-//                    override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-//                        isLoadingAd = false
-//                        Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
-//                        Toast.makeText(context, "onAdFailedToLoad", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            )
         }
 
         /** Check if ad was loaded more than n hours ago. */
@@ -261,9 +271,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
          * @param activity the activity that shows the app open ad
          */
         fun showAdIfAvailable(activity: Activity) {
-            showAdIfAvailable(
-                activity,
-                object : OnShowAdCompleteListener {
+            showAdIfAvailable(activity, object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                         // Empty because the user will go back to the activity that shows the ad.
                     }
@@ -302,7 +310,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                         appOpenAd = null
                         isShowingAd = false
                         Log.d(LOG_TAG, "onAdDismissedFullScreenContent.")
-                        Toast.makeText(activity, "onAdDismissedFullScreenContent", Toast.LENGTH_SHORT).show()
+
 
                         onShowAdCompleteListener.onShowAdComplete()
                         loadAd(activity)
@@ -313,7 +321,6 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                         appOpenAd = null
                         isShowingAd = false
                         Log.d(LOG_TAG, "onAdFailedToShowFullScreenContent: " + adError.message)
-                        Toast.makeText(activity, "onAdFailedToShowFullScreenContent", Toast.LENGTH_SHORT).show()
 
                         onShowAdCompleteListener.onShowAdComplete()
                         loadAd(activity)
@@ -322,8 +329,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     /** Called when fullscreen content is shown. */
                     override fun onAdShowedFullScreenContent() {
                         Log.d(LOG_TAG, "onAdShowedFullScreenContent.")
-                        Toast.makeText(activity, "onAdShowedFullScreenContent", Toast.LENGTH_SHORT).show()
-                    }
+                     }
                 }
             )
             isShowingAd = true

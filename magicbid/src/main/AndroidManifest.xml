@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <application
         android:name="com.magicbid.app.App"
@@ -11,24 +12,23 @@
         <activity
             android:name="com.magicbid.app.OpenApp"
             android:exported="true"/>
-        <activity android:name="com.magicbid.app.Interstital" />
-        <activity android:name="com.magicbid.app.BannerAD" />
-        <activity android:name="com.magicbid.app.NativeAD" />
-        <activity android:name="com.magicbid.app.RewardedAD" />
 
 
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-6683051613977291~5947357131" />
 <!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-5390573296880593~2090404960" />-->
+<!--            android:name="token"-->
+<!--            android:value="TTS123456" />-->
+
 
 <!--        <meta-data-->
 <!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-6683051613977291~9984756170" />-->
+<!--            android:value="ca-app-pub-3940256099942544~3347511713" />-->
 
-
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
+<!--            android:value="ca-app-pub-5390573296880593~3502876831" />-->
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
+<!--            android:value="ca-app-pub-1566698467413226~9629977462" />-->
 
     </application>
 

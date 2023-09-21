@@ -1,14 +1,25 @@
 package com.magicbid.app
 
+import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
+
 
 interface ApiInterface {
+    @GET("/api/getAds/{token}")
+    suspend fun getApptomative(@Path("token") token: Any?): Response<MagicbidResponse>
+
+    @POST("/api/sdk-stats")
+    suspend fun postData(
+        @Query("ip") ip: String,
+        @Query("app_id") app_id: Any?,
+        @Query("ads_id") ads_id: String,
+        @Query("date") date: String
+    ): Response<JsonObject>
 
 
-    @GET("/api/getAds/TTS1234567")
-    suspend fun getApptomative(
-
-    ): Response<MagicbidResponse>
 
 }

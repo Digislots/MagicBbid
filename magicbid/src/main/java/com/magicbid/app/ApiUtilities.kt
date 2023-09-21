@@ -17,32 +17,26 @@ object ApiUtilities {
 
     fun getInstance(): Retrofit? {
 
-
-
         return try {
 
 
-            val trustAllCerts = arrayOf<TrustManager>(
-                object : X509TrustManager {
-                    @Throws(CertificateException::class)
-                    override fun checkClientTrusted(
-                        chain: Array<X509Certificate>,
-                        authType: String
-                    ) {
-                    }
-
-                    @Throws(CertificateException::class)
-                    override fun checkServerTrusted(
-                        chain: Array<X509Certificate>,
-                        authType: String
-                    ) {
-                    }
-
-                    override fun getAcceptedIssuers(): Array<X509Certificate> {
-                        return arrayOf()
-                    }
+            val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+                @Throws(CertificateException::class)
+                override fun checkClientTrusted(
+                    chain: Array<X509Certificate>, authType: String
+                ) {
                 }
-            )
+
+                @Throws(CertificateException::class)
+                override fun checkServerTrusted(
+                    chain: Array<X509Certificate>, authType: String
+                ) {
+                }
+
+                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                    return arrayOf()
+                }
+            })
             val sslContext = SSLContext.getInstance("SSL")
             sslContext.init(null, trustAllCerts, SecureRandom())
 
@@ -59,13 +53,13 @@ object ApiUtilities {
             httpClient.sslSocketFactory(sslSocketFactory, trustAllCerts.get(0) as X509TrustManager)
             httpClient.hostnameVerifier(HostnameVerifier { hostname, session -> true })
 
-            httpClient.addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            httpClient.addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
 
             Retrofit.Builder().baseUrl("https://admin.digislots.in")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(httpClient.build())
+                .addConverterFactory(GsonConverterFactory.create()).client(httpClient.build())
                 .build()
-
 
 
         } catch (e: Exception) {

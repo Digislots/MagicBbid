@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.appcompat.widget.LinearLayoutCompat
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent"
+     tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/bannerad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+         />
 
     <TextView
+        android:visibility="gone"
         android:layout_marginTop="50dp"
         android:id="@+id/openapp"
         android:layout_width="wrap_content"
@@ -21,62 +29,72 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <TextView
-        android:layout_marginTop="50dp"
-        android:id="@+id/banner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Banner AD"
-        android:textSize="50sp"
-        android:layout_gravity="center"
+    <com.magicbid.app.TemplateView
+        android:id="@+id/template"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:layout_alignParentBottom="true"
+       android:visibility="gone"
+        app:gnt_template_type="@layout/gnt_small_template_view"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:layout_marginTop="50dp"
-        android:id="@+id/interstital"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Interstital AD"
-        android:textSize="50sp"
-        android:layout_gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
-    <TextView
-        android:layout_marginTop="50dp"
-        android:id="@+id/nativead"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Native AD"
-        android:textSize="50sp"
-        android:layout_gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <TextView-->
+<!--        android:layout_marginTop="50dp"-->
+<!--        android:id="@+id/banner"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Banner AD"-->
+<!--        android:textSize="50sp"-->
+<!--        android:layout_gravity="center"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--    <TextView-->
+<!--        android:layout_marginTop="50dp"-->
+<!--        android:id="@+id/interstital"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Interstital AD"-->
+<!--        android:textSize="50sp"-->
+<!--        android:layout_gravity="center"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
-    <TextView
-        android:layout_marginTop="50dp"
-        android:id="@+id/rewarded"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rewarded AD"
-        android:textSize="50sp"
-        android:layout_gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <TextView-->
+<!--        android:layout_marginTop="50dp"-->
+<!--        android:id="@+id/nativead"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Native AD"-->
+<!--        android:textSize="50sp"-->
+<!--        android:layout_gravity="center"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+
+<!--    <TextView-->
+<!--        android:layout_marginTop="50dp"-->
+<!--        android:id="@+id/rewarded"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Rewarded AD"-->
+<!--        android:textSize="50sp"-->
+<!--        android:layout_gravity="center"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
 
 
-</LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

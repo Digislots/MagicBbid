@@ -6,10 +6,12 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
+import android.text.format.Formatter
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -28,17 +30,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
-import android.text.format.Formatter
 
 
 class MagicBidSdk(private var context: Context) {
+    private lateinit var sortedAdsList: MutableList<Adscode>
     val result = Prefs.getResponseAll(context)
+    var currentAddPosition= 0
     var maxCpmAdscode = ""
-    var maxCpm = 0
 
     var isOpen = false
     var rewardedInterstitialAd: RewardedInterstitialAd? = null
-    var rewardedAd: RewardedAd? = null
 
     private var adView: AdView? = null
 
@@ -52,55 +53,72 @@ class MagicBidSdk(private var context: Context) {
 
 
 
-
-//    Collections.sort(result, Comparator<Any?> { obj1, obj2 ->
-//        return@Comparator Integer.valueOf(obj2.cpm).compareTo(Integer.valueOf(obj1.cpm));
-//    })
-
-    fun showOpenAD(activity: Activity, onShowAdCompleteListener: App.OnShowAdCompleteListener) {
-        val app = activity.application as App
-        app.showAdIfAvailable(activity, onShowAdCompleteListener)
-    }
-
-
     fun adaptiveBanner(activity: Activity, linearLayout: LinearLayout) {
         if (result != null) {
 
-//            Collections.sort(result, Comparator { obj1, obj2 ->
-//                return@Comparator Integer.valueOf(obj2.cpm.toInt())
-//                    .compareTo(Integer.valueOf(obj1.cpm.toInt()))
-//            })
-
-
             try {
+                val adsList = result.filter { it.ads_type == 1 }
+                Log.d("adlist", adsList.toString())
+                sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+                Log.d("sortedAdsList", sortedAdsList.toString())
 
-                for (ads in result) {
-                    if (ads.ads_type == 1) {
-                        if (ads.cpm > maxCpm) {
-                            maxCpm = ads.cpm.toInt()
-                            maxCpmAdscode = ads.adscode
-                            adView = AdView(activity)
-                            adView!!.adUnitId = maxCpmAdscode
-                            linearLayout.removeAllViews()
-                            linearLayout.addView(adView)
-                            val adSize = getAdSize(activity, linearLayout)
-                            adView!!.setAdSize(adSize)
-                            val adRequest = AdRequest.Builder().build()
-                            adView!!.loadAd(adRequest)
+                loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
 
-                            postData(maxCpmAdscode)
-                        }
-                    }
-                }
+
             } catch (e: Exception) {
                 Log.d("dvbvb", e.toString())
             }
+
+
         }
 
     }
 
 
-    private fun getAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
+    fun loadAdd(activity: Activity, linearLayout: LinearLayout, adId: String) {
+        Log.d("currentposition","currentAddPosition : $currentAddPosition")
+        adView = AdView(activity)
+        adView!!.adUnitId = adId
+        Log.d("adidddd",adId)
+        linearLayout.removeAllViews()
+        linearLayout.addView(adView)
+        val adSize = getAdSize(activity, linearLayout)
+        adView!!.setAdSize(adSize)
+        val adRequest = AdRequest.Builder().build()
+        adView!!.loadAd(adRequest)
+
+        adView!!.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                postData(adId)
+                // Ad loaded successfully
+            }
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("banner_ad", adError.message)
+                Log.d("banner_ad", sortedAdsList[currentAddPosition].cpm.toString())
+                Log.d("banner_ad", sortedAdsList[currentAddPosition].adscode)
+
+                if (adError.message == "No fill.") {
+
+                    currentAddPosition++
+                    loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
+
+
+                    // Remove the current ad from the list and continue with the next highest CPM ad.
+
+                } else {
+                    // Ad failed to load for another reason, handle it as needed.
+                }
+            }
+
+            override fun onAdClicked() {
+                // Ad clicked by the user
+            }
+        }
+    }
+
+
+    fun getAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
         val display = activity.windowManager.defaultDisplay
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)
@@ -118,57 +136,58 @@ class MagicBidSdk(private var context: Context) {
     fun showinterStitalad() {
 
         if (result != null) {
-            try {
-                for (ads in result) {
-                    if (ads.ads_type == 3) {
-                        if (ads.cpm > maxCpm) {
-                            maxCpm = ads.cpm.toInt()
-                            maxCpmAdscode = ads.adscode
-
-                            var mInterstitialAd: InterstitialAd? = null
-
-                            var adRequest = AdRequest.Builder().build()
-
-                            InterstitialAd.load(
-                                context,
-                                maxCpmAdscode,
-                                adRequest,
-                                object : InterstitialAdLoadCallback() {
-                                    override fun onAdFailedToLoad(adError: LoadAdError) {
-
-                                        mInterstitialAd = null
-
-                                        // "No fill.",
-                                        if (adError.message.equals("No fill.")) {
-                                            loadInterstitialWithDescendingCPM()
-                                        }
 
 
-                                    }
+            val adsList = result.filter { it.ads_type == 1 }
+            Log.d("adlist", adsList.toString())
+            sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+            Log.d("sortedAdsList", sortedAdsList.toString())
+            loadinterstitalad(sortedAdsList[currentAddPosition].adscode)
+
+        }
 
 
-                                    override fun onAdLoaded(interstitialAd: InterstitialAd) {
+    }
 
-                                        mInterstitialAd = interstitialAd
-                                        if (mInterstitialAd != null) {
-                                            mInterstitialAd?.show(context as Activity)
-                                            postData(maxCpmAdscode)
+    private fun loadinterstitalad(adscode: String) {
+        var mInterstitialAd: InterstitialAd? = null
+        val adRequest = AdRequest.Builder().build()
 
-                                        }
-                                    }
-                                })
+        InterstitialAd.load(
+            context,adscode,
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
 
-                        }
+                    mInterstitialAd = null
+
+                    Log.d("InterstitialAd", adError.message)
+                    Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
+                    Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
+
+                    // "No fill.",
+                    if (adError.message == "No fill.") {
+                        currentAddPosition++
+                        loadinterstitalad(sortedAdsList[currentAddPosition].adscode)
+
                     }
 
 
                 }
-            } catch (e: Exception) {
-                Log.d("dvbvb", e.toString())
-            }
-        }
 
 
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    mInterstitialAd = interstitialAd
+                    if (mInterstitialAd != null) {
+                        mInterstitialAd?.show(context as Activity)
+
+                        Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
+                        Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
+                        postData(adscode)
+
+                    }
+                }
+            })
     }
 
 
@@ -177,39 +196,52 @@ class MagicBidSdk(private var context: Context) {
 
     fun showNativeAds(context: Context, view: TemplateView) {
         if (result != null) {
-            for (ads in result) {
-                try {
-                    if (ads.ads_type == 4) {
-                        if (ads.cpm > maxCpm) {
-                            maxCpm = ads.cpm.toInt()
-                            maxCpmAdscode = ads.adscode
-
-                        }
-                    }
-
-                } catch (e: Exception) {
-                    Log.d("dvbvb", e.toString())
-                }
 
 
-            }
+            val adsList = result.filter { it.ads_type == 1 }
+            Log.d("adlist", adsList.toString())
+            sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+            Log.d("sortedAdsList", sortedAdsList.toString())
+            loadnativead(context,view,sortedAdsList[currentAddPosition].adscode)
 
 
-            val adLoader: AdLoader = AdLoader.Builder(
-                context, maxCpmAdscode)
-                .forNativeAd {
+
+        }
+    }
+
+    private fun loadnativead(context: Context, view: TemplateView, adscode: String) {
+
+        val adLoader: AdLoader = AdLoader.Builder(
+            this.context, adscode
+        )
+            .forNativeAd {
 //                val styles =
 //                    NativeTemplateStyle.Builder().withMainBackgroundColor(context.resources.getColor(R.color.white)).build()
 //                val template: TemplateView = findViewById(R.id.my_template)
 //                view.setStyles(styles)
-                    view.setNativeAd(it)
-                    view.visibility = View.VISIBLE
-                    postData(maxCpmAdscode)
-                }
-                .build()
+                view.setNativeAd(it)
+                view.visibility = View.VISIBLE
+                postData(adscode)
+            }.withAdListener(object : AdListener() {
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
 
-            adLoader.loadAd(AdRequest.Builder().build())
-        }
+                    if (loadAdError.message == "No fill.") {
+                        currentAddPosition++
+                        loadnativead(context,view,adscode)
+
+                    }
+
+
+                    // Handle the case where no ad was loaded
+                    // You can update your UI or take any necessary actions here.
+                }
+            })
+            .build()
+
+        adLoader.loadAd(AdRequest.Builder().build())
+
+
+
     }
 
 
@@ -219,49 +251,54 @@ class MagicBidSdk(private var context: Context) {
     //this method will be show rewarded video ad
 
 
-    fun loadAdrewarded() {
-
-
-        var maxCpm = 0
+    fun sowAdrewarded() {
 
 
         if (result != null) {
-
-            for (ads in result) {
-                try {
-//"ca-app-pub-3940256099942544/5354046379"
-                    if (ads.ads_type == 5) {
-                        if (ads.cpm > maxCpm) {
-                            maxCpm = ads.cpm.toInt()
-                            maxCpmAdscode = ads.adscode
-                            //loadAd(maxCpmAdscode)
-                            RewardedInterstitialAd.load(context,
-                                maxCpmAdscode,
-                                AdManagerAdRequest.Builder().build(),
-                                object : RewardedInterstitialAdLoadCallback() {
-                                    override fun onAdLoaded(ad: RewardedInterstitialAd) {
-                                        rewardedInterstitialAd = ad
-                                        showRewardedAds(maxCpmAdscode)
-
-                                    }
-
-                                    override fun onAdFailedToLoad(adError: LoadAdError) {
-                                        rewardedInterstitialAd = null
-
-                                    }
-                                })
+            val adsList = result.filter { it.ads_type == 1 }
+            Log.d("adlist", adsList.toString())
+            sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+            Log.d("sortedAdsList", sortedAdsList.toString())
+            loadrewarded(sortedAdsList[currentAddPosition].adscode)
 
 
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.d("dvbvb", e.toString())
-                }
+
+
+            //loadAd(maxCpmAdscode)
+
+
+
+
             }
         }
 
+    private fun loadrewarded(adscode: String) {
+        RewardedInterstitialAd.load(context,
+            adscode,
+            AdManagerAdRequest.Builder().build(),
+            object : RewardedInterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedInterstitialAd) {
+                    rewardedInterstitialAd = ad
+                    showRewardedAds(adscode)
 
+                }
+
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    rewardedInterstitialAd = null
+
+                    if (adError.message == "No fill.") {
+                        currentAddPosition++
+                        loadrewarded(adscode)
+
+                    }
+
+
+                }
+            })
     }
+
+
+
 
     private fun showRewardedAds(maxCpmAdscode: String) {
 
@@ -310,47 +347,5 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    fun loadInterstitialWithDescendingCPM() {
-        // Sort the result list by CPM in descending order
-        result?.sortedByDescending { it.cpm }
-        // result.sortByDescending { it.cpm }
-        try {
-            if (result != null) {
-                var mInterstitialAd: InterstitialAd? = null
-                for (ads in result) {
-                    if (ads.cpm > maxCpm && ads.adscode != maxCpmAdscode) {
-                        maxCpm = ads.cpm.toInt()
-                        maxCpmAdscode = ads.adscode
-
-                        // Load the interstitial ad with the new maxCpmAdscode
-                        val adRequest = AdRequest.Builder().build()
-
-                        InterstitialAd.load(
-                            context,
-                            maxCpmAdscode,
-                            adRequest,
-                            object : InterstitialAdLoadCallback() {
-                                override fun onAdFailedToLoad(adError: LoadAdError) {
-                                    loadInterstitialWithDescendingCPM()
-
-                                }
-
-                                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                                    mInterstitialAd = interstitialAd
-                                    if (mInterstitialAd != null) {
-                                        mInterstitialAd?.show(context as Activity)
-                                        postData(maxCpmAdscode)
-                                    }
-                                }
-                            })
-                        break // Exit the loop after loading the next ad
-                    }
-                }
-            }
-        } catch (e: Exception) {
-
-
-        }
-    }
 
 }

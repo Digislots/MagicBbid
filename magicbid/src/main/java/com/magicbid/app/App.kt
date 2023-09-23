@@ -3,7 +3,6 @@ package com.magicbid.app
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
@@ -32,10 +31,13 @@ private const val LOG_TAG = "MyApplication"
 
 /** Application class that initializes, loads and show ads when activities change states. */
 class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
-
+    private var isLoadingAd: Boolean = false
+    private lateinit var sortedAdsList: MutableList<Adscode>
     private lateinit var appOpenAdManager: AppOpenAdManager
     private var currentActivity: Activity? = null
-
+    var currentAddPosition= 0
+    private var appOpenAd: AppOpenAd? = null
+    private var loadTime: Long = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -150,14 +152,14 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     }
 
     /** Inner class that loads and shows app open ads. */
-    private inner class AppOpenAdManager {
+      public inner class AppOpenAdManager {
 
-        private var appOpenAd: AppOpenAd? = null
-        private var isLoadingAd = false
+
+
         var isShowingAd = false
 
         /** Keep track of the time an app open ad is loaded to ensure you don't show an expired ad. */
-        private var loadTime: Long = 0
+
 
         /**
          * Load an ad.
@@ -175,73 +177,18 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
 
             val result =  Prefs.getResponseAll(applicationContext)
-            var maxCpm = 0
-            var maxCpmAdscode =""
+
 
             if (result != null) {
 
-                for (ads in result) {
-                    if (ads.ads_type == 2) {
-                        if (ads.cpm > maxCpm) {
-                            maxCpm = ads.cpm.toInt()
-                            maxCpmAdscode = ads.adscode
-
-                            isLoadingAd = true
-                            val request = AdRequest.Builder().build()
-                            AppOpenAd.load(context, maxCpmAdscode, request,
-                                AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, object : AppOpenAd.AppOpenAdLoadCallback() {
-
-                                    override fun onAdLoaded(ad: AppOpenAd) {
-                                        appOpenAd = ad
-                                        isLoadingAd = false
-                                        loadTime = Date().time
-                                        Log.d(LOG_TAG, "onAdLoaded.")
-
-
-                                        val formatter = SimpleDateFormat("yyyy-MM-dd")
-                                        val date = Date()
-                                        val currentdate = formatter.format(date)
-
-
-                                        val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
-                                        val ipAddress: String = Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
-
-                                        val ai: ApplicationInfo = context.packageManager
-                                                .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                                            val app_id = ai.metaData["com.google.android.gms.ads.APPLICATION_ID"]
-
-                                            try {
-                                                CoroutineScope(Dispatchers.IO).launch {
-                                                    val res = ApiUtilities.getApiInterface()!!
-                                                        .postData(ipAddress, app_id, maxCpmAdscode, currentdate)
-                                                    withContext(Dispatchers.Main) {
-                                                        try {
-                                                            res.body().toString()
-                                                        } catch (e: Exception) {
-                                                            Log.d("dvbvb", e.toString())
-                                                        }
-                                                    }
-                                                }
-                                            } catch (e: Exception) {
-                                                Log.d("dvbvb", e.toString())
-
-                                            }
+                val adsList = result.filter { it.ads_type == 1 }
+                Log.d("adlist", adsList.toString())
+                sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+                Log.d("sortedAdsList", sortedAdsList.toString())
+                loadopenad(context,sortedAdsList[currentAddPosition].adscode)
 
 
 
-                                    }
-
-
-                                    override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                                        isLoadingAd = false
-                                        Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
-                                     }
-                                }
-                            )
-
-                        }
-                    }
-                }
             }
 
 
@@ -335,5 +282,77 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             isShowingAd = true
             appOpenAd!!.show(activity)
         }
+    }
+
+      fun loadopenad(context: Context, adscode: String) {
+
+
+        isLoadingAd = true
+        val request = AdRequest.Builder().build()
+        AppOpenAd.load(context, adscode, request,
+            AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, object : AppOpenAd.AppOpenAdLoadCallback() {
+
+                override fun onAdLoaded(ad: AppOpenAd) {
+                    appOpenAd = ad
+                    isLoadingAd = false
+                    loadTime = Date().time
+                    Log.d(LOG_TAG, "onAdLoaded.")
+
+
+                    val formatter = SimpleDateFormat("yyyy-MM-dd")
+                    val date = Date()
+                    val currentdate = formatter.format(date)
+
+
+                    val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                    val ipAddress: String = Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
+
+                    val ai: ApplicationInfo = context.packageManager
+                        .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                    val app_id = ai.metaData["com.google.android.gms.ads.APPLICATION_ID"]
+
+                    try {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val res = ApiUtilities.getApiInterface()!!
+                                .postData(ipAddress, app_id, adscode, currentdate)
+                            withContext(Dispatchers.Main) {
+                                try {
+                                    res.body().toString()
+                                } catch (e: Exception) {
+                                    Log.d("dvbvb", e.toString())
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.d("dvbvb", e.toString())
+
+                    }
+
+
+
+                }
+
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    isLoadingAd = false
+                    Log.d("opena_pp", loadAdError.message)
+                    Log.d("opena_pp", sortedAdsList[currentAddPosition].cpm.toString())
+                    Log.d("opena_pp", sortedAdsList[currentAddPosition].adscode)
+                    Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
+                    if (loadAdError.message == "No fill.") {
+
+                        currentAddPosition++
+                        loadopenad(context,adscode)
+
+
+                        // Remove the current ad from the list and continue with the next highest CPM ad.
+
+                    } else {
+                        // Ad failed to load for another reason, handle it as needed.
+                    }
+                }
+            }
+        )
+
     }
 }

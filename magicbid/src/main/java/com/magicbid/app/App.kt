@@ -30,12 +30,11 @@ import java.util.Date
 private const val LOG_TAG = "MyApplication"
 
 /** Application class that initializes, loads and show ads when activities change states. */
-class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
+class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
     private var isLoadingAd: Boolean = false
-    private lateinit var sortedAdsList: MutableList<Adscode>
     private lateinit var appOpenAdManager: AppOpenAdManager
     private var currentActivity: Activity? = null
-    var currentAddPosition= 0
+    var currentAddPosition = 0
     private var appOpenAd: AppOpenAd? = null
     private var loadTime: Long = 0
 
@@ -63,39 +62,22 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     withContext(Dispatchers.Main) {
                         try {
                             val result = res.body()?.adscode
-                            Prefs.setResponseAll(applicationContext,result)
-
-//
-//                            val pubappid = res.body()?.publisherid
-//                            var appIid =
-//
-//                            if (pubappid != null) {
-//                                for (adscode in pubappid) {
-//                                    appIid = adscode.app_code
-//
-//                                    Prefs.setAppid(applicationContext,appIid)
-//
-//                                }
-//
-//
-//
-//                            }
+                            Prefs.setResponseAll(applicationContext, result)
 
 
                         } catch (e: Exception) {
-                            Log.d("dvbvb", e.toString())
+
 
                         }
                     }
                 }
             } catch (e: Exception) {
-                Log.d("dvbvb", e.toString())
-                //hideLoader()
+
+
             }
 
 
         }
-
 
 
     }
@@ -152,8 +134,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     }
 
     /** Inner class that loads and shows app open ads. */
-      public inner class AppOpenAdManager {
-
+    public inner class AppOpenAdManager {
 
 
         var isShowingAd = false
@@ -175,24 +156,23 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             isLoadingAd = true
 
 
-
-            val result =  Prefs.getResponseAll(applicationContext)
+            val result = Prefs.getResponseAll(applicationContext)
 
 
             if (result != null) {
 
                 val adsList = result.filter { it.ads_type == 1 }
-                Log.d("adlist", adsList.toString())
-                sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
-                Log.d("sortedAdsList", sortedAdsList.toString())
-                loadopenad(context,sortedAdsList[currentAddPosition].adscode)
+                Log.d("opena_pp", adsList.toString())
+                val sortedAdsList = adsList.sortedByDescending { it.cpm }
+                Log.d("opena_pp", sortedAdsList.toString())
 
+
+                if (sortedAdsList.isNotEmpty()) {
+                    loadopenad(context, sortedAdsList[currentAddPosition].adscode, sortedAdsList)
+                }
 
 
             }
-
-
-
 
 
         }
@@ -219,10 +199,10 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
          */
         fun showAdIfAvailable(activity: Activity) {
             showAdIfAvailable(activity, object : OnShowAdCompleteListener {
-                    override fun onShowAdComplete() {
-                        // Empty because the user will go back to the activity that shows the ad.
-                    }
+                override fun onShowAdComplete() {
+                    // Empty because the user will go back to the activity that shows the ad.
                 }
+            }
             )
         }
 
@@ -232,7 +212,10 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
          * @param activity the activity that shows the app open ad
          * @param onShowAdCompleteListener the listener to be notified when an app open ad is complete
          */
-        fun showAdIfAvailable(activity: Activity, onShowAdCompleteListener: OnShowAdCompleteListener) {
+        fun showAdIfAvailable(
+            activity: Activity,
+            onShowAdCompleteListener: OnShowAdCompleteListener
+        ) {
             // If the app open ad is already showing, do not show the ad again.
             if (isShowingAd) {
                 Log.d(LOG_TAG, "The app open ad is already showing.")
@@ -276,7 +259,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     /** Called when fullscreen content is shown. */
                     override fun onAdShowedFullScreenContent() {
                         Log.d(LOG_TAG, "onAdShowedFullScreenContent.")
-                     }
+                    }
                 }
             )
             isShowingAd = true
@@ -284,7 +267,7 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         }
     }
 
-      fun loadopenad(context: Context, adscode: String) {
+    fun loadopenad(context: Context, adscode: String, sortedAdsList: List<Adscode>) {
 
 
         isLoadingAd = true
@@ -297,7 +280,8 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     isLoadingAd = false
                     loadTime = Date().time
                     Log.d(LOG_TAG, "onAdLoaded.")
-
+                    Log.d("opena_pp", sortedAdsList[currentAddPosition].cpm.toString())
+                    Log.d("opena_pp", sortedAdsList[currentAddPosition].adscode)
 
                     val formatter = SimpleDateFormat("yyyy-MM-dd")
                     val date = Date()
@@ -305,7 +289,8 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
 
                     val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
-                    val ipAddress: String = Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
+                    val ipAddress: String =
+                        Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
 
                     val ai: ApplicationInfo = context.packageManager
                         .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
@@ -329,7 +314,6 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     }
 
 
-
                 }
 
 
@@ -339,10 +323,10 @@ class  App: Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     Log.d("opena_pp", sortedAdsList[currentAddPosition].cpm.toString())
                     Log.d("opena_pp", sortedAdsList[currentAddPosition].adscode)
                     Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
-                    if (loadAdError.message == "No fill.") {
+                    if (loadAdError.code == 3) {
 
                         currentAddPosition++
-                        loadopenad(context,adscode)
+                        loadopenad(context, adscode, sortedAdsList)
 
 
                         // Remove the current ad from the list and continue with the next highest CPM ad.

@@ -62,7 +62,12 @@ class MagicBidSdk(private var context: Context) {
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 Log.d("sortedAdsList", sortedAdsList.toString())
 
-                loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
+                if (sortedAdsList.isNotEmpty()){
+                    loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
+
+                }
+
+
 
 
             } catch (e: Exception) {
@@ -98,7 +103,7 @@ class MagicBidSdk(private var context: Context) {
                 Log.d("banner_ad", sortedAdsList[currentAddPosition].cpm.toString())
                 Log.d("banner_ad", sortedAdsList[currentAddPosition].adscode)
 
-                if (adError.message == "No fill.") {
+                if (adError.code == 3) {
 
                     currentAddPosition++
                     loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
@@ -166,7 +171,7 @@ class MagicBidSdk(private var context: Context) {
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
 
                     // "No fill.",
-                    if (adError.message == "No fill.") {
+                    if (adError.code == 3) {
                         currentAddPosition++
                         loadinterstitalad(sortedAdsList[currentAddPosition].adscode)
 
@@ -225,7 +230,7 @@ class MagicBidSdk(private var context: Context) {
             }.withAdListener(object : AdListener() {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
 
-                    if (loadAdError.message == "No fill.") {
+                    if (loadAdError.code == 3) {
                         currentAddPosition++
                         loadnativead(context,view,adscode)
 
@@ -259,7 +264,14 @@ class MagicBidSdk(private var context: Context) {
             Log.d("adlist", adsList.toString())
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
             Log.d("sortedAdsList", sortedAdsList.toString())
-            loadrewarded(sortedAdsList[currentAddPosition].adscode)
+
+
+
+            if (sortedAdsList.isNotEmpty()) {
+                loadrewarded(sortedAdsList[currentAddPosition].adscode)
+             }
+
+
 
 
 
@@ -269,8 +281,8 @@ class MagicBidSdk(private var context: Context) {
 
 
 
-            }
         }
+    }
 
     private fun loadrewarded(adscode: String) {
         RewardedInterstitialAd.load(context,
@@ -286,7 +298,7 @@ class MagicBidSdk(private var context: Context) {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
                     rewardedInterstitialAd = null
 
-                    if (adError.message == "No fill.") {
+                    if (adError.code == 3) {
                         currentAddPosition++
                         loadrewarded(adscode)
 

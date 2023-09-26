@@ -143,7 +143,7 @@ class MagicBidSdk(private var context: Context) {
         if (result != null) {
 
 
-            val adsList = result.filter { it.ads_type == 1 }
+            val adsList = result.filter { it.ads_type == 3 }
             Log.d("adlist", adsList.toString())
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
             Log.d("sortedAdsList", sortedAdsList.toString())
@@ -203,7 +203,7 @@ class MagicBidSdk(private var context: Context) {
         if (result != null) {
 
 
-            val adsList = result.filter { it.ads_type == 1 }
+            val adsList = result.filter { it.ads_type == 4 }
             Log.d("adlist", adsList.toString())
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
             Log.d("sortedAdsList", sortedAdsList.toString())
@@ -260,7 +260,7 @@ class MagicBidSdk(private var context: Context) {
 
 
         if (result != null) {
-            val adsList = result.filter { it.ads_type == 1 }
+            val adsList = result.filter { it.ads_type == 5 }
             Log.d("adlist", adsList.toString())
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
             Log.d("sortedAdsList", sortedAdsList.toString())

@@ -161,7 +161,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
             if (result != null) {
 
-                val adsList = result.filter { it.ads_type == 1 }
+                val adsList = result.filter { it.ads_type == 2 }
                 Log.d("opena_pp", adsList.toString())
                 val sortedAdsList = adsList.sortedByDescending { it.cpm }
                 Log.d("opena_pp", sortedAdsList.toString())

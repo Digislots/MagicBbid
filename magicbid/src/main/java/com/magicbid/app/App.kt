@@ -62,6 +62,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                     withContext(Dispatchers.Main) {
                         try {
                             val result = res.body()?.adscode
+                            Log.d("resultData", result.toString())
                             Prefs.setResponseAll(applicationContext, result)
 
 

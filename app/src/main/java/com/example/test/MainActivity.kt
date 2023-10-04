@@ -33,8 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         bannerad = findViewById(R.id.bannerad)
         templateView = findViewById(R.id.template)
+
+
+
         magicBidSdk = MagicBidSdk(this)
-        magicBidSdk.adaptiveBanner(this,bannerad)
+        magicBidSdk.showinterStitalad()
 
 
 

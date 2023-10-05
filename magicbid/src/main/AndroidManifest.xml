@@ -14,14 +14,14 @@
             android:exported="true"/>
 
 
-        <meta-data
-            android:name="token"
-            android:value="1695730788" />
+<!--        <meta-data-->
+<!--            android:name="token"-->
+<!--            android:value="1695730788" />-->
 
 
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5390573296880593~3878117011" />
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
+<!--            android:value="ca-app-pub-5390573296880593~3878117011" />-->
 
 
     </application>

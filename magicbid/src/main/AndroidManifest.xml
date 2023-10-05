@@ -14,21 +14,15 @@
             android:exported="true"/>
 
 
-<!--        <meta-data-->
-<!--            android:name="token"-->
-<!--            android:value="TTS123456" />-->
+        <meta-data
+            android:name="token"
+            android:value="1695730788" />
 
 
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-3940256099942544~3347511713" />-->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5390573296880593~3878117011" />
 
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-5390573296880593~3502876831" />-->
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-1566698467413226~9629977462" />-->
 
     </application>
 

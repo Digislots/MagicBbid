@@ -30,7 +30,7 @@ import java.util.Date
 private const val LOG_TAG = "MyApplication"
 
 /** Application class that initializes, loads and show ads when activities change states. */
-class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
+open class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
     private var isLoadingAd: Boolean = false
     private lateinit var appOpenAdManager: AppOpenAdManager
     private var currentActivity: Activity? = null

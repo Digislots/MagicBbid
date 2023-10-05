@@ -9,6 +9,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -19,7 +20,6 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +40,8 @@ class MagicBidSdk(private var context: Context) {
     val currentdate = formatter.format(date)
     val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
     val ipAddress: String = Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
+
+    var mInterstitialAd: InterstitialAd? = null
 
     fun adaptiveBanner(activity: Activity, linearLayout: LinearLayout) {
         if (result != null) {
@@ -98,7 +100,11 @@ class MagicBidSdk(private var context: Context) {
         val adWidth = (adWidthPixels / density).toInt()
         return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth)
     }
-    fun showinterStitalad() {
+
+
+
+
+    fun showinterStitalad(listnerInterface: AdListnerInterface) {
         if (result != null) {
             val adsList = result.filter { it.ads_type == 3 }
             Log.d("adlist", adsList.toString())
@@ -107,12 +113,20 @@ class MagicBidSdk(private var context: Context) {
 
             if (sortedAdsList.isNotEmpty()) {
 
-                loadinterstitalad(sortedAdsList[currentAddPosition].adscode)
+                loadinterstitalad(sortedAdsList[currentAddPosition].adscode,listnerInterface)
             }
         }
     }
-    private fun loadinterstitalad(adscode: String) {
-        var mInterstitialAd: InterstitialAd? = null
+
+
+
+
+
+
+    private fun loadinterstitalad(adscode: String, listnerInterface: AdListnerInterface) {
+
+
+
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(context, adscode, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -120,21 +134,93 @@ class MagicBidSdk(private var context: Context) {
                 Log.d("InterstitialAd", adError.message)
                 Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
                 Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
+                listnerInterface.onAdFailedToLoad(adError)
                 if (adError.code == 3) {
                     currentAddPosition++
-                    loadinterstitalad(sortedAdsList[currentAddPosition].adscode)
+                    loadinterstitalad(sortedAdsList[currentAddPosition].adscode, listnerInterface)
                 }
             }
+
+
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                //Log.d(TAG, 'Ad was loaded.')
                 mInterstitialAd = interstitialAd
+
                 if (mInterstitialAd != null) {
-                    mInterstitialAd?.show(context as Activity)
+                  //  mInterstitialAd?.show(context as Activity)
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
                     postData(adscode)
                 }
+
+                mInterstitialAd?.fullScreenContentCallback =
+                    object : FullScreenContentCallback() {
+                        override fun onAdClicked() {
+                            // Called when a click is recorded for an ad.
+                            //Log.d(TAG, "Ad was clicked.")
+                            listnerInterface.onAdClicked()
+                        }
+
+                        override fun onAdDismissedFullScreenContent() {
+                            // Called when ad is dismissed.
+                            //Log.d(TAG, "Ad dismissed fullscreen content.")
+                            mInterstitialAd = null
+                            listnerInterface.onAdDismissedFullScreenContent()
+
+                        }
+
+                        override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                            // Called when ad fails to show.
+                            //Log.e(TAG, "Ad failed to show fullscreen content.")
+                            mInterstitialAd = null
+                            listnerInterface.onAdFailedToShowFullScreenContent(adError)
+                        }
+
+                        override fun onAdImpression() {
+                            // Called when an impression is recorded for an ad.
+                            //Log.d(TAG, "Ad recorded an impression.")
+                            listnerInterface.onAdImpression()
+                        }
+
+                        override fun onAdShowedFullScreenContent() {
+                            // Called when ad is shown.
+                            //Log.d(TAG, "Ad showed fullscreen content.")
+                            listnerInterface.onAdShowedFullScreenContent()
+                        }
+                    }
+
+
+                listnerInterface.onAdLoaded(boolean = true)
+
             }
+
+
+//            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+//                mInterstitialAd = interstitialAd
+//
+//                if (mInterstitialAd != null) {
+//                    mInterstitialAd?.show(context as Activity)
+//                    Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
+//                    Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
+//                    postData(adscode)
+//                }
+//
+//                listnerInterface.onAdLoaded(boolean = true)
+//            }
         })
+
+
+
+    }
+
+    fun adIsLoading():Boolean{
+        return mInterstitialAd!=null
+    }
+
+    fun showInterstitialAds(){
+        if (mInterstitialAd!=null){
+            mInterstitialAd!!.show(context as Activity)
+        }
     }
     fun showNativeAds(context: Context, view: TemplateView) {
         if (result != null) {
@@ -233,4 +319,6 @@ class MagicBidSdk(private var context: Context) {
 
         }
     }
+
+
 }

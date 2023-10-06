@@ -10,7 +10,8 @@
 
     <LinearLayout
         android:id="@+id/bannerad"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
         android:orientation="vertical"
          />
@@ -28,6 +29,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_marginTop="50dp"
+        android:id="@+id/inbannerad"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="300dp"
+        android:orientation="vertical"
+        />
+
 
     <com.magicbid.app.TemplateView
         android:id="@+id/template"

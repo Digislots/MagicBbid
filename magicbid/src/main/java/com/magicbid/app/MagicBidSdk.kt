@@ -103,6 +103,65 @@ class MagicBidSdk(private var context: Context) {
 
 
 
+    fun inlineBanner(activity: Activity, linearLayout: LinearLayout) {
+        if (result != null) {
+            try {
+                val adsList = result.filter { it.ads_type == 1 }
+                Log.d("adlist", adsList.toString())
+                sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+                Log.d("sortedAdsList", sortedAdsList.toString())
+                if (sortedAdsList.isNotEmpty()) {
+                    inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
+                }
+            } catch (e: Exception) {
+                Log.d("dvbvb", e.toString())
+            }
+        }
+    }
+
+    private fun inlineloadAdd(activity: Activity, linearLayout: LinearLayout, adId: String) {
+        Log.d("currentposition", "currentAddPosition : $currentAddPosition")
+        adView = AdView(activity)
+        adView!!.adUnitId = adId
+        Log.d("adidddd", adId)
+        linearLayout.removeAllViews()
+        linearLayout.addView(adView)
+        val adSize = inlinegetAdSize(activity, linearLayout)
+        adView!!.setAdSize(adSize)
+        val adRequest = AdRequest.Builder().build()
+        adView!!.loadAd(adRequest)
+        adView!!.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                postData(adId)
+            }
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("banner_ad", adError.message)
+                Log.d("banner_ad", sortedAdsList[currentAddPosition].cpm.toString())
+                Log.d("banner_ad", sortedAdsList[currentAddPosition].adscode)
+                if (adError.code == 3) {
+                    currentAddPosition++
+                    loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode)
+                }
+            }
+            override fun onAdClicked() {
+
+            }
+        }
+    }
+
+    fun inlinegetAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
+        val display = activity.windowManager.defaultDisplay
+        val outMetrics = DisplayMetrics()
+        display.getMetrics(outMetrics)
+        val density = outMetrics.density
+        var adWidthPixels = linearLayout.width.toFloat()
+        if (adWidthPixels == 0f) {
+            adWidthPixels = outMetrics.widthPixels.toFloat()
+        }
+        val adWidth = (adWidthPixels / density).toInt()
+        return AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(activity, adWidth)
+    }
+
 
     fun showinterStitalad(listnerInterface: AdListnerInterface) {
         if (result != null) {

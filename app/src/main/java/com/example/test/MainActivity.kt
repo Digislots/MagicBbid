@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var magicBidSdk: MagicBidSdk
     lateinit var bannerad: LinearLayout
+    lateinit var inline: LinearLayout
     lateinit var openapp: TextView
     lateinit var templateView: TemplateView
     var rewardedInterstitialAd: RewardedInterstitialAd? = null
@@ -36,50 +37,49 @@ class MainActivity : AppCompatActivity() {
 
         bannerad = findViewById(R.id.bannerad)
         templateView = findViewById(R.id.template)
+        inline = findViewById(R.id.inbannerad)
 
 
 
         magicBidSdk = MagicBidSdk(this)
 
-
-        magicBidSdk.showinterStitalad( object : AdListnerInterface {
-
-            override fun onAdClosed() {
-                super.onAdClosed()
-            }
-
-            override fun onAdFailedToLoad(var1: LoadAdError) {
-                super.onAdFailedToLoad(var1)
-            }
-
-            override fun onAdImpression() {
-                super.onAdImpression()
-            }
-
-            override fun onAdLoaded(boolean: Boolean) {
-                super.onAdLoaded(boolean)
-                Toast.makeText(this@MainActivity,"ads loaded", Toast.LENGTH_SHORT).show()
-            }
+        magicBidSdk.adaptiveBanner(this,bannerad)
+        magicBidSdk.inlineBanner(this,inline)
 
 
-
-
-            override fun onAdDismissedFullScreenContent() {
-                super.onAdDismissedFullScreenContent()
-                Toast.makeText(this@MainActivity,"onAdDismissedFullScreenContent", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-
-            override fun onAdFailedToShowFullScreenContent(var1: AdError) {
-                super.onAdFailedToShowFullScreenContent(var1)
-            }
-
-            override fun onAdShowedFullScreenContent() {
-                super.onAdShowedFullScreenContent()
-                Toast.makeText(this@MainActivity,"onAdShowedFullScreenContent", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+//        magicBidSdk.showinterStitalad( object : AdListnerInterface {
+//            override fun onAdClicked() {
+//                super.onAdClicked()
+//            }
+//
+//            override fun onAdClosed() {
+//                super.onAdClosed()
+//            }
+//
+//            override fun onAdFailedToLoad(var1: LoadAdError) {
+//                super.onAdFailedToLoad(var1)
+//            }
+//
+//            override fun onAdImpression() {
+//                super.onAdImpression()
+//            }
+//
+//            override fun onAdLoaded(boolean: Boolean) {
+//                super.onAdLoaded(boolean)
+//            }
+//
+//            override fun onAdDismissedFullScreenContent() {
+//                super.onAdDismissedFullScreenContent()
+//            }
+//
+//            override fun onAdFailedToShowFullScreenContent(var1: AdError) {
+//                super.onAdFailedToShowFullScreenContent(var1)
+//            }
+//
+//            override fun onAdShowedFullScreenContent() {
+//                super.onAdShowedFullScreenContent()
+//            }
+//        })
 
 //        magicBidSdk.showinterStitalad(object : AdListnerInterface{
 //

@@ -3,7 +3,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.text.format.Formatter
 import android.util.DisplayMetrics
 import android.util.Log
@@ -355,29 +358,57 @@ class MagicBidSdk(private var context: Context) {
                 }
         }
     }
+
+
+
     private fun postData(maxCpmAdscode: String) {
         val ai: ApplicationInfo = context.packageManager.getApplicationInfo(
             context.packageName,
             PackageManager.GET_META_DATA
         )
         val app_id = ai.metaData["com.google.android.gms.ads.APPLICATION_ID"]
-        try {
-            CoroutineScope(Dispatchers.IO).launch {
-                val res = ApiUtilities.getApiInterface()!!
-                    .postData(ipAddress, app_id, maxCpmAdscode, currentdate)
-                withContext(Dispatchers.Main) {
-                    try {
-                        res.body().toString()
-                    } catch (e: Exception) {
-                        Log.d("dvbvb", e.toString())
+
+
+        if (checkForInternet(context)) {
+
+            try {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val res = ApiUtilities.getApiInterface()!!
+                        .postData(ipAddress, app_id, maxCpmAdscode, currentdate)
+                    withContext(Dispatchers.Main) {
+                        try {
+                            res.body().toString()
+                        } catch (e: Exception) {
+                            Log.d("dvbvb", e.toString())
+                        }
                     }
                 }
-            }
-        } catch (e: Exception) {
-            Log.d("dvbvb", e.toString())
+            } catch (e: Exception) {
+                Log.d("dvbvb", e.toString())
 
+            }
+        }
+
+    }
+    private fun checkForInternet(context: Context): Boolean {
+        val connectivityManager =  context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            return when {
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                else -> false
+            }
+        } else {
+
+            @Suppress("DEPRECATION") val networkInfo =
+                connectivityManager.activeNetworkInfo ?: return false
+            @Suppress("DEPRECATION")
+            return networkInfo.isConnected
         }
     }
+
 
 
 }

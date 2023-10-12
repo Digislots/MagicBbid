@@ -328,21 +328,24 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
                         .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
                     val app_id = ai.metaData["com.google.android.gms.ads.APPLICATION_ID"]
 
-                    try {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val res = ApiUtilities.getApiInterface()!!
-                                .postData(ipAddress, app_id, adscode, currentdate)
-                            withContext(Dispatchers.Main) {
-                                try {
-                                    res.body().toString()
-                                } catch (e: Exception) {
-                                    Log.d("dvbvb", e.toString())
+                    if (checkForInternet(context)) {
+
+                        try {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val res = ApiUtilities.getApiInterface()!!
+                                    .postData(ipAddress, app_id, adscode, currentdate)
+                                withContext(Dispatchers.Main) {
+                                    try {
+                                        res.body().toString()
+                                    } catch (e: Exception) {
+                                        Log.d("dvbvb", e.toString())
+                                    }
                                 }
                             }
-                        }
-                    } catch (e: Exception) {
-                        Log.d("dvbvb", e.toString())
+                        } catch (e: Exception) {
+                            Log.d("dvbvb", e.toString())
 
+                        }
                     }
 
 

@@ -1,25 +1,18 @@
 package com.example.test
 
-import android.app.Activity
-import android.content.Intent
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import com.example.mylibrary.databinding.ActivityMaBinding
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import com.magicbid.app.AdListnerInterface
-import com.magicbid.app.App
 import com.magicbid.app.MagicBidSdk
 import com.magicbid.app.TemplateView
+import java.net.NetworkInterface
+import java.net.SocketException
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,11 +22,18 @@ class MainActivity : AppCompatActivity() {
     lateinit var openapp: TextView
     lateinit var templateView: TemplateView
     var rewardedInterstitialAd: RewardedInterstitialAd? = null
-
+    var ip : String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+
+
+
+
+
 
         bannerad = findViewById(R.id.bannerad)
         templateView = findViewById(R.id.template)
@@ -43,8 +43,9 @@ class MainActivity : AppCompatActivity() {
 
         magicBidSdk = MagicBidSdk(this)
 
-        magicBidSdk.adaptiveBanner(this,bannerad)
+       // magicBidSdk.adaptiveBanner(this,bannerad)
         magicBidSdk.inlineBanner(this,inline)
+       // magicBidSdk.showNativeAds(this,templateView)
 
 
 //        magicBidSdk.showinterStitalad( object : AdListnerInterface {
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 //                super.onAdShowedFullScreenContent()
 //            }
 //        })
-
+//
 //        magicBidSdk.showinterStitalad(object : AdListnerInterface{
 //
 //            override fun onAdClosed() {
@@ -91,7 +92,7 @@ class MainActivity : AppCompatActivity() {
 //        })
 //
 //        if (magicBidSdk.adIsLoading()) {
-//            magicBidSdk.showInterstitialAdsLocal()
+//            magicBidSdk.showInterstitialAds()
 //        }
 
 

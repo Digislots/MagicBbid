@@ -10,9 +10,7 @@ import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
-import android.text.format.Formatter
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -23,10 +21,13 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.appopen.AppOpenAd
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.gson.JsonObject
+import retrofit2.Call
+import retrofit2.Response
+import java.net.Inet4Address
+import java.net.NetworkInterface
+
+
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -41,7 +42,7 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
     var currentAddPosition = 0
     private var appOpenAd: AppOpenAd? = null
     private var loadTime: Long = 0
-
+    var ipAddress= "0.0.0.0"
     override fun onCreate() {
         super.onCreate()
         registerActivityLifecycleCallbacks(this)
@@ -58,45 +59,39 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
         val value = ai.metaData["token"]
 
         if (checkForInternet(this)) {
-            CoroutineScope(Dispatchers.IO).launch {
 
+            ApiUtilities.getApiInterface()!!.getApptomative(value)
+                .enqueue(object : retrofit2.Callback<MagicbidResponse> {
+                    override fun onResponse(
+                        call: Call<MagicbidResponse>,
+                        response: Response<MagicbidResponse>
+                    ) {
+                        val result = response.body()?.adscode
 
-                try {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val res = ApiUtilities.getApiInterface()!!.getApptomative(value)
-                        withContext(Dispatchers.Main) {
-                            try {
-                                val result = res.body()?.adscode
-                                Log.d("resultData", result.toString())
-                                Prefs.setResponseAll(applicationContext, result)
+                        val  appid = response.body()?.appdetails
 
+                        Prefs.setAppId(applicationContext,appid!!.app_id)
 
-                            } catch (e: Exception) {
-
-
-                            }
-                        }
+                        Log.d("resultData", result.toString())
+                        Prefs.setResponseAll(applicationContext, result)
                     }
-                } catch (e: Exception) {
+
+                    override fun onFailure(call: Call<MagicbidResponse>, t: Throwable) {
+                        Log.d("resultData", t.toString())
+
+                    }
+
+                })
+//
 
 
-                }
-
-
-            }
-
-        } else {
-            //Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show()
         }
-
-
-
-
 
     }
 
     private fun checkForInternet(context: Context): Boolean {
-        val connectivityManager =  context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val network = connectivityManager.activeNetwork ?: return false
             val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
@@ -200,7 +195,7 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
 
 
                 if (sortedAdsList.isNotEmpty()) {
-                    loadopenad(context, sortedAdsList[currentAddPosition].adscode, sortedAdsList)
+                    loadopenad(context, sortedAdsList[currentAddPosition].adscode, sortedAdsList,sortedAdsList[currentAddPosition].ads_id)
                 }
 
 
@@ -299,7 +294,7 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
         }
     }
 
-    fun loadopenad(context: Context, adscode: String, sortedAdsList: List<Adscode>) {
+    fun loadopenad(context: Context, adscode: String, sortedAdsList: List<Adscode>, adsId: Int) {
 
 
         isLoadingAd = true
@@ -321,31 +316,84 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
 
 
                     val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
-                    val ipAddress: String =
-                        Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
 
-                    val ai: ApplicationInfo = context.packageManager
-                        .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                    val app_id = ai.metaData["com.google.android.gms.ads.APPLICATION_ID"]
+                        //Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
 
-                    if (checkForInternet(context)) {
 
-                        try {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val res = ApiUtilities.getApiInterface()!!
-                                    .postData(ipAddress, app_id, adscode, currentdate)
-                                withContext(Dispatchers.Main) {
-                                    try {
-                                        res.body().toString()
-                                    } catch (e: Exception) {
-                                        Log.d("dvbvb", e.toString())
-                                    }
+
+
+
+
+//                    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+//
+//
+//                    if (connectivityManager is ConnectivityManager) {
+//                        var link: LinkProperties =  connectivityManager.getLinkProperties(connectivityManager.activeNetwork) as LinkProperties
+////            Log.e("Network", link.linkAddresses.toString())
+////            Log.e("Network", link.linkAddresses[1].address.hostAddress)
+//                        link?.let { linkProp ->
+//                            for (linkAddress in linkProp.linkAddresses) {
+//                                val inetAddress = linkAddress.address
+//                                if (inetAddress is Inet4Address
+//                                    && !inetAddress.isLoopbackAddress()
+//                                    && inetAddress.isSiteLocalAddress()
+//                                ) {
+//                                    Log.e("Network",inetAddress.getHostAddress())
+//                                    ipAddress =  inetAddress.getHostAddress()
+//                                }
+//                            }
+//                        }
+//                    }
+
+                    try {
+                        val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+                        while (networkInterfaces.hasMoreElements()) {
+                            val networkInterface = networkInterfaces.nextElement()
+                            val inetAddresses = networkInterface.inetAddresses
+                            while (inetAddresses.hasMoreElements()) {
+                                val inetAddress = inetAddresses.nextElement()
+                                if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
+                                    ipAddress =  inetAddress.hostAddress
+
                                 }
                             }
-                        } catch (e: Exception) {
-                            Log.d("dvbvb", e.toString())
-
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
+
+
+                    if (checkForInternet(context)) {
+                        val app_id = Prefs.getAppId(context)
+                        ApiUtilities.getApiInterface()!!
+                            .postData(ipAddress, app_id , adsId, currentdate)
+                            .enqueue(object : retrofit2.Callback<JsonObject> {
+                                override fun onResponse(
+                                    call: Call<JsonObject>,
+                                    response: Response<JsonObject>
+                                ) {
+
+                                    response.body().toString()
+
+                                }
+
+                                override fun onFailure(
+                                    call: Call<JsonObject>,
+                                    t: Throwable
+                                ) {
+
+                                }
+
+                            })
+//                                withContext(Dispatchers.Main) {
+//                                    try {
+//                                        res.body().toString()
+//                                    } catch (e: Exception) {
+//                                        Log.d("dvbvb", e.toString())
+//                                    }
+//                                }
+
                     }
 
 
@@ -360,8 +408,19 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
                     Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.message)
                     if (loadAdError.code == 3) {
 
-                        currentAddPosition++
-                        loadopenad(context, adscode, sortedAdsList)
+                       // currentAddPosition++
+                        if (sortedAdsList.size-1 > currentAddPosition){
+                            currentAddPosition++
+                        }else{
+                            currentAddPosition = 0
+                        }
+                       // loadopenad(context, adscode, sortedAdsList)
+                        loadopenad(
+                            context,
+                            sortedAdsList[currentAddPosition].adscode,
+                            sortedAdsList,
+                            sortedAdsList[currentAddPosition].ads_id
+                        )
 
 
                         // Remove the current ad from the list and continue with the next highest CPM ad.

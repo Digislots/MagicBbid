@@ -49,4 +49,35 @@ object Prefs {
     }
 
 
+
+
+
+    fun getAppId(applicationContext: Context?): Int {
+        val sharePref = applicationContext?.getSharedPreferences("appCode", AppCompatActivity.MODE_PRIVATE)
+         return sharePref?.getInt("appCode", 0) ?: 0
+    }
+    fun setAppId(applicationContext: Context?, appId: Int) {
+        applicationContext?.let { context ->
+            try {
+                val sharePref = context.getSharedPreferences("appCode", AppCompatActivity.MODE_PRIVATE)
+                val editor = sharePref.edit()
+                editor.putInt("appCode", appId)
+                editor.apply()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Handle the exception as needed (e.g., log the error or show a message to the user).
+            }
+        }
+    }
+
+
+
+//    fun setAppId(applicationContext: Context?, appId: Int) {
+//        val sharePref = applicationContext?.getSharedPreferences("appCode", AppCompatActivity.MODE_PRIVATE)
+//        val editor: SharedPreferences.Editor = sharePref!!.edit()
+//        editor.putInt("appCode", appId)
+//        editor.apply()
+//    }
+
+
 }

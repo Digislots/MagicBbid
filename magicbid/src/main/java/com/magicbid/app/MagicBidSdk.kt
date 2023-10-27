@@ -173,12 +173,8 @@ class MagicBidSdk(private var context: Context) {
 
                     if (sortedAdsList.size-1 > currentAddPosition){
                         currentAddPosition++
-                        loadAdd(
-                            activity,
-                            linearLayout,
-                            sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id
-                        )
+                        inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+
                     }
 
 

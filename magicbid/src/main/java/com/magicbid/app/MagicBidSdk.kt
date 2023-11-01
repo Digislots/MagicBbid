@@ -169,7 +169,7 @@ class MagicBidSdk(private var context: Context) {
                 Log.d("banner_ad", sortedAdsList[currentAddPosition].cpm.toString())
                 Log.d("banner_ad", sortedAdsList[currentAddPosition].adscode)
                 if (adError.code == 3) {
-                //    currentAddPosition++
+                    //    currentAddPosition++
 
                     if (sortedAdsList.size-1 > currentAddPosition){
                         currentAddPosition++
@@ -230,7 +230,7 @@ class MagicBidSdk(private var context: Context) {
                 Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
                 listnerInterface.onAdFailedToLoad(adError)
                 if (adError.code == 3) {
-                   // currentAddPosition++
+                    // currentAddPosition++
 
                     if (sortedAdsList.size-1 > currentAddPosition){
                         currentAddPosition++

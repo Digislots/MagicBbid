@@ -66,14 +66,38 @@ open class App : Application(), Application.ActivityLifecycleCallbacks, Lifecycl
                         call: Call<MagicbidResponse>,
                         response: Response<MagicbidResponse>
                     ) {
-                        val result = response.body()?.adscode
+                       // val result = response.body()?.adscode
 
-                        val  appid = response.body()?.appdetails
+                        try {
+                            val  appid = response.body()?.appdetails
+                            appid?.app_id?.let {
+                                Prefs.setAppId(applicationContext, it)
+                            } ?: run {
 
-                        Prefs.setAppId(applicationContext,appid!!.app_id)
+                            }
 
-                        Log.d("resultData", result.toString())
-                        Prefs.setResponseAll(applicationContext, result)
+                            response.body()?.adscode?.let { result ->
+                                Prefs.setResponseAll(applicationContext, result)
+                            } ?: run {
+                                // Handle the case when response.body() or adscode is null
+                            }
+
+                        }catch (e:Exception){
+                            Log.d("Exception",e.toString())
+
+                        }
+
+
+
+                        //Prefs.setAppId(applicationContext,appid!!.app_id)
+
+
+                       // Log.d("resultData", result.toString())
+
+                      // Prefs.setResponseAll(applicationContext, result)
+
+
+
                     }
 
                     override fun onFailure(call: Call<MagicbidResponse>, t: Throwable) {

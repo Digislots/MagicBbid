@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
-        android:name="com.magicbid.app.App"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
 
@@ -17,12 +16,12 @@
 
 <!--        <meta-data-->
 <!--            android:name="token"-->
-<!--            android:value="1695730788" />-->
+<!--            android:value="1699253970" />-->
 
 
 <!--        <meta-data-->
 <!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-5390573296880593~3878117011" />-->
+<!--            android:value="ca-app-pub-8632977017863445~7502711808" />-->
 
 
     </application>

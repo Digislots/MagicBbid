@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.wifi.WifiManager
+
 import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
@@ -31,6 +31,7 @@ import java.net.NetworkInterface
 import java.text.SimpleDateFormat
 import java.util.Date
 
+@Suppress("DEPRECATION")
 class MagicBidSdk(private var context: Context) {
     private lateinit var sortedAdsList: MutableList<Adscode>
     val result = Prefs.getResponseAll(context)
@@ -41,20 +42,50 @@ class MagicBidSdk(private var context: Context) {
     val formatter = SimpleDateFormat("yyyy-MM-dd")
     val date = Date()
     val currentdate = formatter.format(date)
+    private lateinit var listnerInterface: AdListnerInterface
 
 
 
+    init {
+        ApiSingleton.initialize(context)
+
+    }
+
+    enum class AdType {
+
+        ADAPTIVEBANNER,
+        INLINEBANNER,
+        INTERSTITIAL,
+        NATIVE,
+        REWARDED
+
+    }
+
+    fun loadAd(adType: AdType,listnerInterface: AdListnerInterface) {
+        when (adType) {
+            AdType.ADAPTIVEBANNER -> Unit
+            AdType.INLINEBANNER -> Unit
+
+            AdType.INTERSTITIAL ->  showInterstitialAd(listnerInterface)
+            AdType.NATIVE -> Unit
+
+            AdType.REWARDED -> showAdRewarded(listnerInterface)
+        }
+
+    }
+
+    init {
+
+    }
 
 
-    val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
-    var ipAddress ="0.0.0.0"
+    var ipAddress = "0.0.0.0"
     //= Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
 
-    private lateinit var listnerInterface:AdListnerInterface
 
     var mInterstitialAd: InterstitialAd? = null
 
-    fun adaptiveBanner(activity: Activity, linearLayout: LinearLayout) {
+    private fun adaptiveBanner(activity: Activity, linearLayout: LinearLayout) {
         if (result != null) {
             try {
                 val adsList = result.filter { it.ads_type == 1 }
@@ -62,7 +93,12 @@ class MagicBidSdk(private var context: Context) {
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 Log.d("sortedAdsList", sortedAdsList.toString())
                 if (sortedAdsList.isNotEmpty()) {
-                    loadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                    loadAdd(
+                        activity,
+                        linearLayout,
+                        sortedAdsList[currentAddPosition].adscode,
+                        sortedAdsList[currentAddPosition].ads_id
+                    )
                 }
             } catch (e: Exception) {
                 Log.d("dvbvb", e.toString())
@@ -94,7 +130,7 @@ class MagicBidSdk(private var context: Context) {
                 if (adError.code == 3) {
                     //postData(adId)
 
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
                         loadAdd(
                             activity,
@@ -127,7 +163,7 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    fun inlineBanner(activity: Activity, linearLayout: LinearLayout) {
+    private fun inlineBanner(activity: Activity, linearLayout: LinearLayout) {
         if (result != null) {
             try {
                 val adsList = result.filter { it.ads_type == 1 }
@@ -135,7 +171,12 @@ class MagicBidSdk(private var context: Context) {
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 Log.d("sortedAdsList", sortedAdsList.toString())
                 if (sortedAdsList.isNotEmpty()) {
-                    inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                    inlineloadAdd(
+                        activity,
+                        linearLayout,
+                        sortedAdsList[currentAddPosition].adscode,
+                        sortedAdsList[currentAddPosition].ads_id
+                    )
                 }
             } catch (e: Exception) {
                 Log.d("dvbvb", e.toString())
@@ -171,12 +212,16 @@ class MagicBidSdk(private var context: Context) {
                 if (adError.code == 3) {
                     //    currentAddPosition++
 
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
-                        inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                        inlineloadAdd(
+                            activity,
+                            linearLayout,
+                            sortedAdsList[currentAddPosition].adscode,
+                            sortedAdsList[currentAddPosition].ads_id
+                        )
 
                     }
-
 
 
                 }
@@ -202,8 +247,8 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    fun showinterStitalad(listnerInterface1: AdListnerInterface) {
-        listnerInterface = listnerInterface1
+    private fun showInterstitialAd(listenerInterface1:AdListnerInterface) {
+        listnerInterface = listenerInterface1
         if (result != null) {
             val adsList = result.filter { it.ads_type == 3 }
             Log.d("adlist", adsList.toString())
@@ -212,13 +257,21 @@ class MagicBidSdk(private var context: Context) {
 
             if (sortedAdsList.isNotEmpty()) {
 
-                loadinterstitalad(sortedAdsList[currentAddPosition].adscode, listnerInterface,sortedAdsList[currentAddPosition].ads_id)
+                loadinterstitalad(
+                    sortedAdsList[currentAddPosition].adscode,
+                    listnerInterface,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             }
         }
     }
 
 
-    private fun loadinterstitalad(adscode: String, listnerInterface: AdListnerInterface, adsId: Int) {
+    private fun loadinterstitalad(
+        adscode: String,
+        listnerInterface: AdListnerInterface,
+        adsId: Int
+    ) {
 
 
         val adRequest = AdRequest.Builder().build()
@@ -232,7 +285,7 @@ class MagicBidSdk(private var context: Context) {
                 if (adError.code == 3) {
                     // currentAddPosition++
 
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
                         loadinterstitalad(
                             sortedAdsList[currentAddPosition].adscode,
@@ -251,7 +304,7 @@ class MagicBidSdk(private var context: Context) {
                 mInterstitialAd = interstitialAd
 
                 if (mInterstitialAd != null) {
-                    //  mInterstitialAd?.show(context as Activity)
+                      mInterstitialAd?.show(context as Activity)
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
                     postData(adsId)
@@ -313,7 +366,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    fun showNativeAds(context: Context, view: TemplateView) {
+    private fun showNativeAds(context: Context, view: TemplateView) {
         if (result != null) {
             val adsList = result.filter { it.ads_type == 4 }
             Log.d("adlist", adsList.toString())
@@ -321,7 +374,12 @@ class MagicBidSdk(private var context: Context) {
             Log.d("sortedAdsList", sortedAdsList.toString())
 
             if (sortedAdsList.isNotEmpty()) {
-                loadnativead(context, view, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                loadnativead(
+                    context,
+                    view,
+                    sortedAdsList[currentAddPosition].adscode,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             }
         }
     }
@@ -342,7 +400,7 @@ class MagicBidSdk(private var context: Context) {
                 Log.d("loadnativead", sortedAdsList[currentAddPosition].adscode)
                 if (loadAdError.code == 3) {
 
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
                         loadnativead(
                             context,
@@ -362,36 +420,44 @@ class MagicBidSdk(private var context: Context) {
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
-    fun sowAdrewarded() {
+    private fun showAdRewarded(listenerInterface1:AdListnerInterface) {
+        listnerInterface = listenerInterface1
         if (result != null) {
             val adsList = result.filter { it.ads_type == 5 }
             Log.d("adlist", adsList.toString())
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
             Log.d("sortedAdsList", sortedAdsList.toString())
             if (sortedAdsList.isNotEmpty()) {
-                loadrewarded(sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                loadrewarded(
+                    sortedAdsList[currentAddPosition].adscode,
+                    listnerInterface,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             }
         }
     }
 
-    private fun loadrewarded(adscode: String, adsId: Int) {
+    private fun loadrewarded(adscode: String,listnerInterface: AdListnerInterface, adsId: Int,) {
         RewardedInterstitialAd.load(context,
             adscode,
             AdManagerAdRequest.Builder().build(),
             object : RewardedInterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedInterstitialAd) {
                     rewardedInterstitialAd = ad
+                    listnerInterface.onAdLoaded(boolean = true)
                     showRewardedAds(adsId)
                 }
 
                 override fun onAdFailedToLoad(adError: LoadAdError) {
                     rewardedInterstitialAd = null
+                    listnerInterface.onAdFailedToLoad(adError)
                     if (adError.code == 3) {
                         //currentAddPosition++
-                        if (sortedAdsList.size-1 > currentAddPosition){
+                        if (sortedAdsList.size - 1 > currentAddPosition) {
                             currentAddPosition++
                             loadrewarded(
                                 sortedAdsList[currentAddPosition].adscode,
+                                listnerInterface,
                                 sortedAdsList[currentAddPosition].ads_id
                             )
                         }
@@ -419,7 +485,6 @@ class MagicBidSdk(private var context: Context) {
     private fun postData(adsId: Int) {
 
 
-
         try {
             val networkInterfaces = NetworkInterface.getNetworkInterfaces()
             while (networkInterfaces.hasMoreElements()) {
@@ -428,7 +493,7 @@ class MagicBidSdk(private var context: Context) {
                 while (inetAddresses.hasMoreElements()) {
                     val inetAddress = inetAddresses.nextElement()
                     if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                        ipAddress =  inetAddress.hostAddress
+                        ipAddress = inetAddress.hostAddress
 
                     }
                 }
@@ -437,31 +502,17 @@ class MagicBidSdk(private var context: Context) {
             e.printStackTrace()
         }
 
-//        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
-//        if (connectivityManager is ConnectivityManager) {
-//            var link: LinkProperties =  connectivityManager.getLinkProperties(connectivityManager.activeNetwork) as LinkProperties
-////            Log.e("Network", link.linkAddresses.toString())
-////            Log.e("Network", link.linkAddresses[1].address.hostAddress)
-//            link?.let { linkProp ->
-//                for (linkAddress in linkProp.linkAddresses) {
-//                    val inetAddress = linkAddress.address
-//                    if (inetAddress is Inet4Address
-//                        && !inetAddress.isLoopbackAddress()
-//                        && inetAddress.isSiteLocalAddress()
-//                    ) {
-//                        Log.e("Network",inetAddress.getHostAddress())
-//                        ipAddress =  inetAddress.getHostAddress()
-//                    }
-//                }
-//            }
-//        }
 
-        if (checkForInternet(context)) {
+        if (checkForInternet(context).not()) {
+            Log.d("Internet", "No internet connection")
+            return
+        }
+
             val app_id = Prefs.getAppId(context)
 
 
             ApiUtilities.getApiInterface()!!
-                .postData(ipAddress.toString(), app_id, adsId , currentdate)
+                .postData(ipAddress.toString(), app_id, adsId, currentdate)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onResponse(
                         call: Call<JsonObject>,
@@ -482,7 +533,7 @@ class MagicBidSdk(private var context: Context) {
                 })
 
 
-        }
+
 
     }
 

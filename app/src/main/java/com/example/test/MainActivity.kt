@@ -10,7 +10,6 @@ import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.magicbid.app.AdListnerInterface
 import com.magicbid.app.MagicBidSdk
 import com.magicbid.app.TemplateView
-import java.net.NetworkInterface
 import java.net.SocketException
 
 
@@ -42,10 +41,20 @@ class MainActivity : AppCompatActivity() {
 
 
         magicBidSdk = MagicBidSdk(this)
+        magicBidSdk.loadAd(MagicBidSdk.AdType.INTERSTITIAL,object :AdListnerInterface{
 
-       // magicBidSdk.adaptiveBanner(this,bannerad)
-        magicBidSdk.inlineBanner(this,inline)
-       // magicBidSdk.showNativeAds(this,templateView)
+        })
+//        magicBidSdk.loadAd(MagicBidSdk.AdType.REWARDED,object :AdListnerInterface{
+//
+//        })
+
+
+
+
+//
+//        magicBidSdk.adaptiveBanner(this,bannerad)
+//        magicBidSdk.inlineBanner(this,inline)
+//        magicBidSdk.showNativeAds(this,templateView)
 
 
 //        magicBidSdk.showinterStitalad( object : AdListnerInterface {
@@ -99,13 +108,7 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    override fun onBackPressed() {
-        if (magicBidSdk.adIsLoading()) {
-            magicBidSdk.showInterstitialAds()
-//        }
-            super.onBackPressed()
-        }
-    }
+
 
 
 

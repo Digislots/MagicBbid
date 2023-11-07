@@ -14,15 +14,15 @@ class OpenApp : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_open_)
 
-        val application = application as? App ?: return
-
-        application.showAdIfAvailable(
-            this@OpenApp,
-            object : App.OnShowAdCompleteListener {
-                override fun onShowAdComplete() {
-                    //startMainActivity()
-                }
-            })
+//        val application = application as? App ?: return
+//
+//        application.showAdIfAvailable(
+//            this@OpenApp,
+//            object : App.OnShowAdCompleteListener {
+//                override fun onShowAdComplete() {
+//                    //startMainActivity()
+//                }
+//            })
 
     }
 }

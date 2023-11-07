@@ -34,16 +34,15 @@ import java.util.Date
 @Suppress("DEPRECATION")
 class MagicBidSdk(private var context: Context) {
     private lateinit var sortedAdsList: MutableList<Adscode>
-    val result = Prefs.getResponseAll(context)
-    var currentAddPosition = 0
-    var isOpen = false
-    var rewardedInterstitialAd: RewardedInterstitialAd? = null
+    private val result = Prefs.getResponseAll(context)
+    private var currentAddPosition = 0
+    private var isOpen = false
+    private var rewardedInterstitialAd: RewardedInterstitialAd? = null
     private var adView: AdView? = null
-    val formatter = SimpleDateFormat("yyyy-MM-dd")
-    val date = Date()
-    val currentdate = formatter.format(date)
+    private val formatter = SimpleDateFormat("yyyy-MM-dd")
+    private val date = Date()
+    private val currentdate = formatter.format(date)
     private lateinit var listnerInterface: AdListnerInterface
-
 
 
     init {
@@ -61,12 +60,12 @@ class MagicBidSdk(private var context: Context) {
 
     }
 
-    fun loadAd(adType: AdType,listnerInterface: AdListnerInterface) {
+    fun loadAd(adType: AdType, listnerInterface: AdListnerInterface) {
         when (adType) {
             AdType.ADAPTIVEBANNER -> Unit
             AdType.INLINEBANNER -> Unit
 
-            AdType.INTERSTITIAL ->  showInterstitialAd(listnerInterface)
+            AdType.INTERSTITIAL -> showInterstitialAd(listnerInterface)
             AdType.NATIVE -> Unit
 
             AdType.REWARDED -> showAdRewarded(listnerInterface)
@@ -79,11 +78,11 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    var ipAddress = "0.0.0.0"
+    private var ipAddress = "0.0.0.0"
     //= Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
 
 
-    var mInterstitialAd: InterstitialAd? = null
+   private var mInterstitialAd: InterstitialAd? = null
 
     private fun adaptiveBanner(activity: Activity, linearLayout: LinearLayout) {
         if (result != null) {
@@ -106,7 +105,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    fun loadAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int) {
+    private fun loadAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int) {
         Log.d("currentposition", "currentAddPosition : $currentAddPosition")
         adView = AdView(activity)
         adView!!.adUnitId = adId
@@ -149,7 +148,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    fun getAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
+    private fun getAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
         val display = activity.windowManager.defaultDisplay
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)
@@ -233,7 +232,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    fun inlinegetAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
+    private fun inlinegetAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
         val display = activity.windowManager.defaultDisplay
         val outMetrics = DisplayMetrics()
         display.getMetrics(outMetrics)
@@ -247,7 +246,7 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    private fun showInterstitialAd(listenerInterface1:AdListnerInterface) {
+    private fun showInterstitialAd(listenerInterface1: AdListnerInterface) {
         listnerInterface = listenerInterface1
         if (result != null) {
             val adsList = result.filter { it.ads_type == 3 }
@@ -304,7 +303,7 @@ class MagicBidSdk(private var context: Context) {
                 mInterstitialAd = interstitialAd
 
                 if (mInterstitialAd != null) {
-                      mInterstitialAd?.show(context as Activity)
+                    mInterstitialAd?.show(context as Activity)
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].cpm.toString())
                     Log.d("InterstitialAd", sortedAdsList[currentAddPosition].adscode)
                     postData(adsId)
@@ -356,11 +355,11 @@ class MagicBidSdk(private var context: Context) {
 
     }
 
-    fun adIsLoading(): Boolean {
+    private fun adIsLoading(): Boolean {
         return mInterstitialAd != null
     }
 
-    fun showInterstitialAds() {
+    private fun showInterstitialAds() {
         if (mInterstitialAd != null) {
             mInterstitialAd!!.show(context as Activity)
         }
@@ -420,7 +419,7 @@ class MagicBidSdk(private var context: Context) {
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
-    private fun showAdRewarded(listenerInterface1:AdListnerInterface) {
+    private fun showAdRewarded(listenerInterface1: AdListnerInterface) {
         listnerInterface = listenerInterface1
         if (result != null) {
             val adsList = result.filter { it.ads_type == 5 }
@@ -437,7 +436,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    private fun loadrewarded(adscode: String,listnerInterface: AdListnerInterface, adsId: Int,) {
+    private fun loadrewarded(adscode: String, listnerInterface: AdListnerInterface, adsId: Int) {
         RewardedInterstitialAd.load(context,
             adscode,
             AdManagerAdRequest.Builder().build(),
@@ -508,31 +507,29 @@ class MagicBidSdk(private var context: Context) {
             return
         }
 
-            val app_id = Prefs.getAppId(context)
+        val app_id = Prefs.getAppId(context)
 
 
-            ApiUtilities.getApiInterface()!!
-                .postData(ipAddress.toString(), app_id, adsId, currentdate)
-                .enqueue(object : retrofit2.Callback<JsonObject> {
-                    override fun onResponse(
-                        call: Call<JsonObject>,
-                        response: Response<JsonObject>
-                    ) {
+        ApiUtilities.getApiInterface()!!
+            .postData(ipAddress.toString(), app_id, adsId, currentdate)
+            .enqueue(object : retrofit2.Callback<JsonObject> {
+                override fun onResponse(
+                    call: Call<JsonObject>,
+                    response: Response<JsonObject>
+                ) {
 
-                        response.body().toString()
+                    response.body().toString()
 
-                    }
+                }
 
-                    override fun onFailure(
-                        call: Call<JsonObject>,
-                        t: Throwable
-                    ) {
+                override fun onFailure(
+                    call: Call<JsonObject>,
+                    t: Throwable
+                ) {
 
-                    }
+                }
 
-                })
-
-
+            })
 
 
     }

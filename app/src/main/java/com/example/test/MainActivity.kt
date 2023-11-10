@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         magicBidSdk = MagicBidSdk(this)
         magicBidSdk.loadAd(MagicBidSdk.AdType.INTERSTITIAL,object :AdListnerInterface{
 
+
+
         })
 //        magicBidSdk.loadAd(MagicBidSdk.AdType.REWARDED,object :AdListnerInterface{
 //

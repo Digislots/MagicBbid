@@ -261,7 +261,11 @@ class MagicBidSdk(private var context: Context) {
                     listnerInterface,
                     sortedAdsList[currentAddPosition].ads_id
                 )
+            }else{
+                listenerInterface1.onApiFailed()
             }
+        }else{
+            listenerInterface1.onApiFailed()
         }
     }
 
@@ -432,7 +436,11 @@ class MagicBidSdk(private var context: Context) {
                     listnerInterface,
                     sortedAdsList[currentAddPosition].ads_id
                 )
+            }else{
+                listenerInterface1.onApiFailed()
             }
+        }else{
+            listenerInterface1.onApiFailed()
         }
     }
 

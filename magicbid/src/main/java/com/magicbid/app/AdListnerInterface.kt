@@ -16,4 +16,6 @@ interface AdListnerInterface {
     fun onAdFailedToShowFullScreenContent(var1: AdError) {}
 
     fun onAdShowedFullScreenContent() {}
+
+    fun onApiFailed() {}
 }

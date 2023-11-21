@@ -17,8 +17,26 @@ object ApiSingleton {
 
 
     fun initialize(context: Context) {
-        MobileAds.initialize(context) {}
-        makeApiCall(context)
+
+      //  MobileAds.initialize(context) {}
+
+        MobileAds.initialize(context) { initializationStatus ->
+            if (initializationStatus.adapterStatusMap.isNotEmpty()) {
+
+                makeApiCall(context)
+
+
+                // Mobile Ads SDK initialization is successful
+                // You can now load ads or perform other tasks
+                Log.e("AdsInitialization", "Mobile Ads SDK initialized successfully")
+            } else {
+                // Initialization failed, check initializationStatus.getErrorCodes() for details
+                Log.e("AdsInitialization", "Mobile Ads SDK initialization failed")
+            }
+        }
+
+
+
     }
 
 

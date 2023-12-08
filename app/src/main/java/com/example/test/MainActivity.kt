@@ -1,10 +1,15 @@
 package com.example.test
 
+import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.magicbid.app.AdListnerInterface
@@ -16,101 +21,62 @@ import java.net.SocketException
 class MainActivity : AppCompatActivity() {
 
     private lateinit var magicBidSdk: MagicBidSdk
-    lateinit var bannerad: LinearLayout
-    lateinit var inline: LinearLayout
-    lateinit var openapp: TextView
-    lateinit var templateView: TemplateView
-    var rewardedInterstitialAd: RewardedInterstitialAd? = null
-    var ip : String = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-
-
-
-
-
-
-        bannerad = findViewById(R.id.bannerad)
-        templateView = findViewById(R.id.template)
-        inline = findViewById(R.id.inbannerad)
-
-
-
         magicBidSdk = MagicBidSdk(this)
-        magicBidSdk.loadAd(MagicBidSdk.AdType.INTERSTITIAL,object :AdListnerInterface{
+        magicBidSdk.loadinterStitalad(object : AdListnerInterface {
+            override fun onAdClicked() {
+                Log.d("magicbid","onAdClicked")
 
+            }
+
+            override fun onAdClosed() {
+                Log.d("magicbid","onAdClosed")
+            }
+
+            override fun onAdFailedToLoad(var1: LoadAdError) {
+                Log.d("magicbid","onAdFailedToLoad")
+            }
+
+            override fun onAdImpression() {
+                Log.d("magicbid","onAdImpression")
+            }
+
+            override fun onAdLoaded(boolean: Boolean) {
+                Log.d("magicbid","onAdLoaded")
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                Log.d("magicbid","onAdDismissedFullScreenContent")
+            }
+
+            override fun onAdFailedToShowFullScreenContent(var1: AdError) {
+                Log.d("magicbid","onAdFailedToShowFullScreenContent")
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Log.d("magicbid","onAdShowedFullScreenContent")
+            }
+
+            override fun onApiFailed() {
+                Log.d("magicbid","onApiFailed")
+            }
 
 
         })
-//        magicBidSdk.loadAd(MagicBidSdk.AdType.REWARDED,object :AdListnerInterface{
-//
-//        })
-
-
-
-
-//
-//        magicBidSdk.adaptiveBanner(this,bannerad)
-//        magicBidSdk.inlineBanner(this,inline)
-//        magicBidSdk.showNativeAds(this,templateView)
-
-
-//        magicBidSdk.showinterStitalad( object : AdListnerInterface {
-//            override fun onAdClicked() {
-//                super.onAdClicked()
-//            }
-//
-//            override fun onAdClosed() {
-//                super.onAdClosed()
-//            }
-//
-//            override fun onAdFailedToLoad(var1: LoadAdError) {
-//                super.onAdFailedToLoad(var1)
-//            }
-//
-//            override fun onAdImpression() {
-//                super.onAdImpression()
-//            }
-//
-//            override fun onAdLoaded(boolean: Boolean) {
-//                super.onAdLoaded(boolean)
-//            }
-//
-//            override fun onAdDismissedFullScreenContent() {
-//                super.onAdDismissedFullScreenContent()
-//            }
-//
-//            override fun onAdFailedToShowFullScreenContent(var1: AdError) {
-//                super.onAdFailedToShowFullScreenContent(var1)
-//            }
-//
-//            override fun onAdShowedFullScreenContent() {
-//                super.onAdShowedFullScreenContent()
-//            }
-//        })
-//
-//        magicBidSdk.showinterStitalad(object : AdListnerInterface{
-//
-//            override fun onAdClosed() {
-//                super.onAdClosed()
-//            }
-//
-//
-//        })
-//
-//        if (magicBidSdk.adIsLoading()) {
-//            magicBidSdk.showInterstitialAds()
-//        }
-
-
 
 
     }
-
+    override fun onBackPressed() {
+        if (magicBidSdk.setAutoAdCacheing()) {
+            magicBidSdk.showInterstitialAds()
+            super.onBackPressed()
+        }else{
+            Log.d("magicbid","vfdvf")
+        }
+    }
 
 
 

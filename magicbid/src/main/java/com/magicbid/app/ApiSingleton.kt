@@ -2,6 +2,7 @@
 
 package com.magicbid.app
 
+import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -15,30 +16,33 @@ import retrofit2.Response
 
 object ApiSingleton {
 
-
-    fun initialize(context: Context) {
-
-      //  MobileAds.initialize(context) {}
-
+    fun initialize(context: Context ) {
         MobileAds.initialize(context) { initializationStatus ->
-            if (initializationStatus.adapterStatusMap.isNotEmpty()) {
-
-                makeApiCall(context)
-
-
-                // Mobile Ads SDK initialization is successful
-                // You can now load ads or perform other tasks
-                Log.e("AdsInitialization", "Mobile Ads SDK initialized successfully")
-            } else {
-                // Initialization failed, check initializationStatus.getErrorCodes() for details
-                Log.e("AdsInitialization", "Mobile Ads SDK initialization failed")
+            val statusMap =
+                initializationStatus.adapterStatusMap
+            makeApiCall(context)
+            for (adapterClass in statusMap.keys) {
+                val status = statusMap[adapterClass]
+//                Log.d("MyApp", String.format(
+//                    "Adapter name: %s, Description: %s, Latency: %d",
+//                    adapterClass, status!!.description, status.latency))
             }
+
+            // Start loading ads here...
         }
-
-
-
+//        MobileAds.initialize(application) { initializationStatus ->
+//            initializationStatus.adapterStatusMap.entries.forEach {
+//                Log.d("status____", "${it.key}  ${it.value}")
+//            }
+//
+//            if (initializationStatus.adapterStatusMap.isNotEmpty()) {
+//                makeApiCall(application)
+//                Log.e("AdsInitialization", "Mobile Ads SDK initialized successfully")
+//            } else {
+//                Log.e("AdsInitialization", "Mobile Ads SDK initialization failed")
+//            }
+//        }
     }
-
 
     private fun makeApiCall(context: Context) {
         val value: String?
@@ -50,6 +54,7 @@ object ApiSingleton {
             Log.d("Internet", "No internet connection")
             return
         }
+
         ApiUtilities.getApiInterface().getApptomative(value)
             .enqueue(object : retrofit2.Callback<MagicbidResponse> {
                 override fun onResponse(
@@ -60,32 +65,19 @@ object ApiSingleton {
                         val appid = response.body()?.appdetails
                         appid?.app_id?.let {
                             Prefs.setAppId(context, it)
-                        } ?: run {
-
                         }
-
                         response.body()?.adscode?.let { result ->
                             Prefs.setResponseAll(context, result)
-                        } ?: run {
-                            // Handle the case when response.body() or adscode is null
                         }
-
                     } catch (e: Exception) {
                         Log.d("Exception", e.toString())
-
                     }
-
                 }
 
                 override fun onFailure(call: Call<MagicbidResponse>, t: Throwable) {
                     Log.d("resultData", t.toString())
-
                 }
-
             })
-//
-
-
     }
 
     private fun checkForInternet(context: Context): Boolean {
@@ -104,3 +96,4 @@ object ApiSingleton {
         }
     }
 }
+

@@ -1,8 +1,7 @@
 @file:Suppress("DEPRECATION")
 
 package com.magicbid.app
-
-import android.app.Application
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -23,9 +22,9 @@ object ApiSingleton {
             makeApiCall(context)
             for (adapterClass in statusMap.keys) {
                 val status = statusMap[adapterClass]
-//                Log.d("MyApp", String.format(
-//                    "Adapter name: %s, Description: %s, Latency: %d",
-//                    adapterClass, status!!.description, status.latency))
+                Log.d("MyApp", String.format(
+                    "Adapter name: %s, Description: %s, Latency: %d",
+                    adapterClass, status!!.description, status.latency))
             }
 
             // Start loading ads here...
@@ -62,8 +61,8 @@ object ApiSingleton {
                     response: Response<MagicbidResponse>
                 ) {
                     try {
-                        val appid = response.body()?.appdetails
-                        appid?.app_id?.let {
+                        val appId = response.body()?.appdetails
+                        appId?.app_id?.let {
                             Prefs.setAppId(context, it)
                         }
                         response.body()?.adscode?.let { result ->
@@ -80,6 +79,7 @@ object ApiSingleton {
             })
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     private fun checkForInternet(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

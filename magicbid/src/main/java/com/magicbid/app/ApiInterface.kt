@@ -2,7 +2,6 @@ package com.magicbid.app
 
 import com.google.gson.JsonObject
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -16,8 +15,8 @@ interface ApiInterface {
     @POST("/api/sdk-stats")
      fun postData(
         @Query("ip") ip: String?,
-        @Query("app_id") app_id: Any?,
-        @Query("ads_id") ads_id: Int,
+        @Query("app_id") appId: Any?,
+        @Query("ads_id") adsId: Int,
         @Query("date") date: String
     ): Call<JsonObject>
 

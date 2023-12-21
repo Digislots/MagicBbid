@@ -1,5 +1,6 @@
 package com.magicbid.app
 
+import android.annotation.SuppressLint
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -20,13 +21,16 @@ object ApiUtilities {
         return try {
 
 
-            val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+            val trustAllCerts = arrayOf<TrustManager>(@SuppressLint("CustomX509TrustManager")
+            object : X509TrustManager {
+                @SuppressLint("TrustAllX509TrustManager")
                 @Throws(CertificateException::class)
                 override fun checkClientTrusted(
                     chain: Array<X509Certificate>, authType: String
                 ) {
                 }
 
+                @SuppressLint("TrustAllX509TrustManager")
                 @Throws(CertificateException::class)
                 override fun checkServerTrusted(
                     chain: Array<X509Certificate>, authType: String
@@ -52,6 +56,7 @@ object ApiUtilities {
 
             httpClient.sslSocketFactory(sslSocketFactory, trustAllCerts.get(0) as X509TrustManager)
             httpClient.hostnameVerifier(HostnameVerifier { hostname, session -> true })
+
 
             httpClient.addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY

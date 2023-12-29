@@ -59,13 +59,14 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    fun adaptiveBannerAD(activity: Activity, linearLayout: LinearLayout) {
+    fun adaptiveBannerAD(activity: Activity, linearLayout: LinearLayout,listnerInterface1: AdListnerInterface) {
         if (result != null) {
+            listnerInterface = listnerInterface1
             try {
                 val adsList = result.filter { it.ads_type == 1 }
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 if (sortedAdsList.isNotEmpty()) {
-                    loadadaptiveBannerAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                    loadadaptiveBannerAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,listnerInterface)
                 }
             } catch (e: Exception) {
                 Log.d("magick bidSDK",e.toString())
@@ -73,7 +74,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    private fun loadadaptiveBannerAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int) {
+    private fun loadadaptiveBannerAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int,listnerInterface: AdListnerInterface) {
         adView = AdView(activity)
         adView!!.adUnitId = adId
         linearLayout.removeAllViews()
@@ -84,13 +85,14 @@ class MagicBidSdk(private var context: Context) {
         adView!!.loadAd(adRequest)
         adView!!.adListener = object : AdListener() {
             override fun onAdLoaded() {
+                listnerInterface.onAdLoaded(boolean = true)
 
                 postData(adsId)
                 val handler = Handler(Looper.getMainLooper())
                 handler.postDelayed({
                     // Refresh the ad after 5 seconds
 
-                    adaptiveBannerAD(activity, linearLayout)
+                    adaptiveBannerAD(activity, linearLayout,listnerInterface)
 
                 }, 15000) // 5000 milliseconds = 5 seconds
 
@@ -98,6 +100,7 @@ class MagicBidSdk(private var context: Context) {
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 if (adError.code == 3) {
+                    listnerInterface.onAdFailedToLoad(adError)
                     adFailedCount++
                     Log.d("adFailedCount","Ad loading failed $adFailedCount times")
                     if (sortedAdsList.size-1 > currentAddPosition){
@@ -106,7 +109,7 @@ class MagicBidSdk(private var context: Context) {
                             activity,
                             linearLayout,
                             sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id
+                            sortedAdsList[currentAddPosition].ads_id,listnerInterface
                         )
                     }
 
@@ -114,6 +117,7 @@ class MagicBidSdk(private var context: Context) {
             }
 
             override fun onAdClicked() {
+                listnerInterface.onAdClicked()
 
             }
         }
@@ -144,6 +148,7 @@ class MagicBidSdk(private var context: Context) {
                     inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
                 }
             } catch (e: Exception) {
+                Log.d("Exception",e.toString())
             }
         }
     }
@@ -323,18 +328,19 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    fun showNativeAds(context: Context, view: TemplateView) {
+    fun showNativeAds(context: Context, view: TemplateView,listnerInterface1: AdListnerInterface) {
         if (result != null) {
+            listnerInterface = listnerInterface1
             val adsList = result.filter { it.ads_type == 4 }
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
 
             if (sortedAdsList.isNotEmpty()) {
-                loadnativead(context, view, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                loadnativead(context, view, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,listnerInterface)
             }
         }
     }
 
-    private fun loadnativead(context: Context, view: TemplateView, adscode: String, adsId: Int) {
+    private fun loadnativead(context: Context, view: TemplateView, adscode: String, adsId: Int,listnerInterface1: AdListnerInterface) {
         val adLoader: AdLoader = AdLoader.Builder(this.context, adscode).forNativeAd {
 //                val styles =
 //                    NativeTemplateStyle.Builder().withMainBackgroundColor(context.resources.getColor(R.color.white)).build()
@@ -343,16 +349,18 @@ class MagicBidSdk(private var context: Context) {
             view.setNativeAd(it)
             view.visibility = View.VISIBLE
             postData(adsId)
+            listnerInterface1.onAdLoaded(boolean = true)
             val handler = Handler(Looper.getMainLooper())
             handler.postDelayed({
                 // Refresh the ad after 5 seconds
 
-                showNativeAds(context, view)
+                showNativeAds(context, view,listnerInterface1)
 
             }, 15000)
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 if (loadAdError.code == 3) {
+                    listnerInterface.onAdFailedToLoad(loadAdError)
                     adFailedCount++
                     Log.d("adFailedCount","Ad loading failed $adFailedCount times")
 
@@ -362,7 +370,7 @@ class MagicBidSdk(private var context: Context) {
                             context,
                             view,
                             sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id
+                            sortedAdsList[currentAddPosition].ads_id,listnerInterface
                         )
                     }
 
@@ -372,6 +380,8 @@ class MagicBidSdk(private var context: Context) {
 
                 }
             }
+
+
         }).build()
         adLoader.loadAd(AdRequest.Builder().build())
     }

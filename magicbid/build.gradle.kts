@@ -20,7 +20,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -76,7 +76,7 @@ publishing {
         create<MavenPublication>("ReleaseAar") {
             groupId = "com.example.mylibrary"
             artifactId = "magicbid"
-            version = "1.2"
+            version = "1.3"
             afterEvaluate {
                 artifact(tasks.getByName("bundleReleaseAar"))
             }

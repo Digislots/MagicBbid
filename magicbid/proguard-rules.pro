@@ -20,4 +20,3 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 #-keep class com.magicbid.app.ApiSingleton
--keep class com.magicbid.app.MagicBidSdk.* { *; }

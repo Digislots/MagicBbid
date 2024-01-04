@@ -54,14 +54,14 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    fun adaptiveBannerAD(activity: Activity, linearLayout: LinearLayout,onInitializationCallback1: OnInitializationCallback) {
+    fun adaptiveBannerAD(activity: Activity,adSize: AdSize,onInitializationCallback1: OnInitializationCallback) {
         if (result != null) {
             onInitializationCallback = onInitializationCallback1
             try {
                 val adsList = result.filter { it.ads_type == 1 }
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 if (sortedAdsList.isNotEmpty()) {
-                    loadadaptiveBannerAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,onInitializationCallback)
+                    loadadaptiveBannerAdd(activity,adSize, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,onInitializationCallback)
                 }
             } catch (e: Exception) {
                 Log.d("magick bidSDK",e.toString())
@@ -69,12 +69,12 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    private fun loadadaptiveBannerAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int,onInitializationCallback1: OnInitializationCallback) {
+    private fun loadadaptiveBannerAdd(activity: Activity, adSize: AdSize, adId: String, adsId: Int,onInitializationCallback1: OnInitializationCallback) {
         adView = AdView(activity)
         adView!!.adUnitId = adId
-        linearLayout.removeAllViews()
-        linearLayout.addView(adView)
-        val adSize = getAdSizeaptiveBannerAdd(activity, linearLayout)
+        //linearLayout.removeAllViews()
+        //linearLayout.addView(adView)
+      //  val adSize = getAdSizeaptiveBannerAdd(activity, linearLayout)
         adView!!.setAdSize(adSize)
         val adRequest = AdRequest.Builder().build()
         adView!!.loadAd(adRequest)
@@ -84,13 +84,13 @@ class MagicBidSdk(private var context: Context) {
                 onInitializationCallback1.onLoadedBannerAd(adView!!)
 
                 postData(adsId)
-                val handler = Handler(Looper.getMainLooper())
-                handler.postDelayed({
-                    // Refresh the ad after 5 seconds
-
-                    adaptiveBannerAD(activity, linearLayout,onInitializationCallback1)
-
-                }, 15000) // 5000 milliseconds = 5 seconds
+//                val handler = Handler(Looper.getMainLooper())
+//                handler.postDelayed({
+//                    // Refresh the ad after 5 seconds
+//
+//                    adaptiveBannerAD(activity,adSize,onInitializationCallback1)
+//
+//                }, 15000) // 5000 milliseconds = 5 seconds
 
             }
 
@@ -101,7 +101,7 @@ class MagicBidSdk(private var context: Context) {
                         currentAddPosition++
                         loadadaptiveBannerAdd(
                             activity,
-                            linearLayout,
+                            adSize,
                             sortedAdsList[currentAddPosition].adscode,
                             sortedAdsList[currentAddPosition].ads_id,onInitializationCallback1
                         )
@@ -131,33 +131,33 @@ class MagicBidSdk(private var context: Context) {
 
 
 
-    fun showNativeAds(context: Context, view: TemplateView,listnerInterface1: AdListnerInterface) {
+    fun showNativeAds(context: Context,listnerInterface1: AdListnerInterface) {
         if (result != null) {
             listnerInterface = listnerInterface1
             val adsList = result.filter { it.ads_type == 4 }
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
 
             if (sortedAdsList.isNotEmpty()) {
-                loadnativead(context, view, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,listnerInterface)
+                loadnativead(context, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,listnerInterface)
             }
         }
     }
 
-    private fun loadnativead(context: Context, view: TemplateView, adscode: String, adsId: Int,listnerInterface1: AdListnerInterface) {
+    private fun loadnativead(context: Context, adscode: String, adsId: Int,listnerInterface1: AdListnerInterface) {
         val adLoader: AdLoader = AdLoader.Builder(this.context, adscode).forNativeAd {
 //                val styles =
 //                    NativeTemplateStyle.Builder().withMainBackgroundColor(context.resources.getColor(R.color.white)).build()
 //                val template: TemplateView = findViewById(R.id.my_template)
 //                view.setStyles(styles)
-            view.setNativeAd(it)
-            view.visibility = View.VISIBLE
+//            view.setNativeAd(it)
+//            view.visibility = View.VISIBLE
             postData(adsId)
             listnerInterface1.onAdLoaded(it)
             val handler = Handler(Looper.getMainLooper())
             handler.postDelayed({
                 // Refresh the ad after 5 seconds
 
-                showNativeAds(context, view,listnerInterface1)
+                showNativeAds(context,listnerInterface1)
 
             }, 15000)
         }.withAdListener(object : AdListener() {
@@ -169,7 +169,6 @@ class MagicBidSdk(private var context: Context) {
                         currentAddPosition++
                         loadnativead(
                             context,
-                            view,
                             sortedAdsList[currentAddPosition].adscode,
                             sortedAdsList[currentAddPosition].ads_id,listnerInterface1
                         )

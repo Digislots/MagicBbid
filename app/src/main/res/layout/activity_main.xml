@@ -17,7 +17,7 @@
         app:gnt_template_type="@layout/gnt_medium_template_view" />
 
     <LinearLayout
-        android:visibility="gone"
+
         android:layout_alignParentBottom="true"
         android:id="@+id/baner"
         android:layout_width="match_parent"

@@ -2,18 +2,12 @@ package com.magicbid.app
 
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.nativead.NativeAd
 
 interface AdListnerInterface {
 
-    fun onAdClicked(){}
-    fun onAdFailedToLoad(var1: LoadAdError){}
-    fun onAdImpression(){}
-    fun onAdLoaded(boolean: Boolean){}
+    fun onAdLoaded(it: NativeAd)
+    fun onAdFailedToLoad(var1: LoadAdError)
 
-    fun onAdDismissedFullScreenContent(){}
-
-    fun onAdFailedToShowFullScreenContent(var1: AdError){}
-
-    fun onAdShowedFullScreenContent(){}
 
 }

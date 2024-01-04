@@ -12,19 +12,14 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
-import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Response
@@ -47,26 +42,26 @@ class MagicBidSdk(private var context: Context) {
     private val currentdate = formatter.format(date)
     private var adidinterstital: Int = 0
     private var magic :Boolean = false
-    var adFailedCount = 0
 
 
     private var ipAddress ="0.0.0.0"
     private lateinit var listnerInterface:AdListnerInterface
-    var mInterstitialAd: InterstitialAd? = null
+    private lateinit var onInitializationCallback: OnInitializationCallback
+    private var mInterstitialAd: InterstitialAd? = null
 
     init {
         ApiSingleton.initialize(context)
     }
 
 
-    fun adaptiveBannerAD(activity: Activity, linearLayout: LinearLayout,listnerInterface1: AdListnerInterface) {
+    fun adaptiveBannerAD(activity: Activity, linearLayout: LinearLayout,onInitializationCallback1: OnInitializationCallback) {
         if (result != null) {
-            listnerInterface = listnerInterface1
+            onInitializationCallback = onInitializationCallback1
             try {
                 val adsList = result.filter { it.ads_type == 1 }
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 if (sortedAdsList.isNotEmpty()) {
-                    loadadaptiveBannerAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,listnerInterface)
+                    loadadaptiveBannerAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,onInitializationCallback)
                 }
             } catch (e: Exception) {
                 Log.d("magick bidSDK",e.toString())
@@ -74,7 +69,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-    private fun loadadaptiveBannerAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int,listnerInterface: AdListnerInterface) {
+    private fun loadadaptiveBannerAdd(activity: Activity, linearLayout: LinearLayout, adId: String, adsId: Int,onInitializationCallback1: OnInitializationCallback) {
         adView = AdView(activity)
         adView!!.adUnitId = adId
         linearLayout.removeAllViews()
@@ -85,14 +80,15 @@ class MagicBidSdk(private var context: Context) {
         adView!!.loadAd(adRequest)
         adView!!.adListener = object : AdListener() {
             override fun onAdLoaded() {
-                listnerInterface.onAdLoaded(boolean = true)
+
+                onInitializationCallback1.onLoadedBannerAd(adView!!)
 
                 postData(adsId)
                 val handler = Handler(Looper.getMainLooper())
                 handler.postDelayed({
                     // Refresh the ad after 5 seconds
 
-                    adaptiveBannerAD(activity, linearLayout,listnerInterface)
+                    adaptiveBannerAD(activity, linearLayout,onInitializationCallback1)
 
                 }, 15000) // 5000 milliseconds = 5 seconds
 
@@ -100,25 +96,18 @@ class MagicBidSdk(private var context: Context) {
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 if (adError.code == 3) {
-                    listnerInterface.onAdFailedToLoad(adError)
-                    adFailedCount++
-                    Log.d("adFailedCount","Ad loading failed $adFailedCount times")
+                    onInitializationCallback1.onFailad(adError)
                     if (sortedAdsList.size-1 > currentAddPosition){
                         currentAddPosition++
                         loadadaptiveBannerAdd(
                             activity,
                             linearLayout,
                             sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id,listnerInterface
+                            sortedAdsList[currentAddPosition].ads_id,onInitializationCallback1
                         )
                     }
 
                 }
-            }
-
-            override fun onAdClicked() {
-                listnerInterface.onAdClicked()
-
             }
         }
     }
@@ -139,194 +128,8 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    fun inlineBannerAD(activity: Activity, linearLayout: LinearLayout) {
-        if (result != null) {
-            try {
-                val adsList = result.filter { it.ads_type == 1 }
-                sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
-                if (sortedAdsList.isNotEmpty()) {
-                    inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
-                }
-            } catch (e: Exception) {
-                Log.d("Exception",e.toString())
-            }
-        }
-    }
-
-    private fun inlineloadAdd(
-        activity: Activity,
-        linearLayout: LinearLayout,
-        adId: String,
-        adsId: Int
-    ) {
-        adView = AdView(activity)
-        adView!!.adUnitId = adId
-        linearLayout.removeAllViews()
-        linearLayout.addView(adView)
-        val adSize = inlinegetAdSize(activity, linearLayout)
-        adView!!.setAdSize(adSize)
-        val adRequest = AdRequest.Builder().build()
-        adView!!.loadAd(adRequest)
-        adView!!.adListener = object : AdListener() {
-            override fun onAdLoaded() {
 
 
-
-                postData(adsId)
-                val handler = Handler(Looper.getMainLooper())
-                handler.postDelayed({
-                    // Refresh the ad after 5 seconds
-
-                    inlineBannerAD(activity, linearLayout)
-
-                }, 15000)
-            }
-
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                if (adError.code == 3) {
-                    adFailedCount++
-                    Log.d("adFailedCount","Ad loading failed $adFailedCount times")
-                    if (sortedAdsList.size-1 > currentAddPosition){
-                        currentAddPosition++
-                        inlineloadAdd(activity, linearLayout, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
-
-                    }
-                }
-            }
-
-            override fun onAdClicked() {
-
-            }
-        }
-    }
-
-    fun inlinegetAdSize(activity: Activity, linearLayout: LinearLayout): AdSize {
-        val display = activity.windowManager.defaultDisplay
-        val outMetrics = DisplayMetrics()
-        display.getMetrics(outMetrics)
-        val density = outMetrics.density
-        var adWidthPixels = linearLayout.width.toFloat()
-        if (adWidthPixels == 0f) {
-            adWidthPixels = outMetrics.widthPixels.toFloat()
-        }
-        val adWidth = (adWidthPixels / density).toInt()
-        return AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(activity, adWidth)
-    }
-
-
-    fun showinterStitalad(listnerInterface1: AdListnerInterface) {
-        listnerInterface = listnerInterface1
-        if (result != null) {
-            val adsList = result.filter { it.ads_type == 3 }
-            sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
-
-            if (sortedAdsList.isNotEmpty()) {
-
-                loadinterstitalad(sortedAdsList[currentAddPosition].adscode, listnerInterface,sortedAdsList[currentAddPosition].ads_id)
-            }
-        }
-    }
-
-
-    private fun loadinterstitalad(adscode: String, listnerInterface: AdListnerInterface, adsId: Int) {
-
-
-        val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(context, adscode, adRequest, object : InterstitialAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                mInterstitialAd = null
-                listnerInterface.onAdFailedToLoad(adError)
-                if (adError.code == 3) {
-                    // currentAddPosition++
-                    adFailedCount++
-                    Log.d("adFailedCount","Ad loading failed $adFailedCount times")
-                    if (sortedAdsList.size-1 > currentAddPosition){
-                        currentAddPosition++
-                        loadinterstitalad(
-                            sortedAdsList[currentAddPosition].adscode,
-                            listnerInterface,
-                            sortedAdsList[currentAddPosition].ads_id
-                        )
-                    } else{
-
-                        if (!magic){
-                            magic = true
-                            currentAddPosition = 0
-                            loadinterstitalad(
-                                sortedAdsList[currentAddPosition].adscode,
-                                listnerInterface,
-                                sortedAdsList[currentAddPosition].ads_id
-                            )
-
-                        }
-
-
-                    }
-
-
-                }
-            }
-
-
-            override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                mInterstitialAd = interstitialAd
-
-                // if (mInterstitialAd != null) {
-
-
-
-//                      mInterstitialAd?.show(context as Activity)
-
-                // }
-                adidinterstital = adsId
-
-                mInterstitialAd?.fullScreenContentCallback =
-                    object : FullScreenContentCallback() {
-                        override fun onAdClicked() {
-                            listnerInterface.onAdClicked()
-                        }
-
-                        override fun onAdDismissedFullScreenContent() {
-                            mInterstitialAd = null
-                            listnerInterface.onAdDismissedFullScreenContent()
-
-                        }
-
-                        override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                            mInterstitialAd = null
-                            listnerInterface.onAdFailedToShowFullScreenContent(adError)
-                        }
-
-                        override fun onAdImpression() {
-                            listnerInterface.onAdImpression()
-                        }
-
-                        override fun onAdShowedFullScreenContent() {
-                            listnerInterface.onAdShowedFullScreenContent()
-                        }
-                    }
-
-
-                listnerInterface.onAdLoaded(boolean = true)
-
-
-            }
-
-        })
-
-
-    }
-
-    fun setAutoAdCacheing(): Boolean {
-        return mInterstitialAd != null
-    }
-
-    fun showInterstitialAds() {
-        if (mInterstitialAd != null) {
-            mInterstitialAd!!.show(context as Activity)
-            postData(adidinterstital)
-        }
-    }
 
     fun showNativeAds(context: Context, view: TemplateView,listnerInterface1: AdListnerInterface) {
         if (result != null) {
@@ -349,7 +152,7 @@ class MagicBidSdk(private var context: Context) {
             view.setNativeAd(it)
             view.visibility = View.VISIBLE
             postData(adsId)
-            listnerInterface1.onAdLoaded(boolean = true)
+            listnerInterface1.onAdLoaded(it)
             val handler = Handler(Looper.getMainLooper())
             handler.postDelayed({
                 // Refresh the ad after 5 seconds
@@ -360,9 +163,7 @@ class MagicBidSdk(private var context: Context) {
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 if (loadAdError.code == 3) {
-                    listnerInterface.onAdFailedToLoad(loadAdError)
-                    adFailedCount++
-                    Log.d("adFailedCount","Ad loading failed $adFailedCount times")
+                    listnerInterface1.onAdFailedToLoad(loadAdError)
 
                     if (sortedAdsList.size-1 > currentAddPosition){
                         currentAddPosition++
@@ -370,7 +171,7 @@ class MagicBidSdk(private var context: Context) {
                             context,
                             view,
                             sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id,listnerInterface
+                            sortedAdsList[currentAddPosition].ads_id,listnerInterface1
                         )
                     }
 
@@ -386,58 +187,6 @@ class MagicBidSdk(private var context: Context) {
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
-    fun sowAdrewarded() {
-        if (result != null) {
-            val adsList = result.filter { it.ads_type == 5 }
-            sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
-            if (sortedAdsList.isNotEmpty()) {
-                loadrewarded(sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
-            }
-        }
-    }
-
-    private fun loadrewarded(adscode: String, adsId: Int) {
-        RewardedInterstitialAd.load(context,
-            adscode,
-            AdManagerAdRequest.Builder().build(),
-            object : RewardedInterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: RewardedInterstitialAd) {
-                    rewardedInterstitialAd = ad
-                    showRewardedAds(adsId)
-                }
-
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    rewardedInterstitialAd = null
-                    if (adError.code == 3) {
-                        adFailedCount++
-                        Log.d("adFailedCount","Ad loading failed $adFailedCount times")
-                        //currentAddPosition++
-                        if (sortedAdsList.size-1 > currentAddPosition){
-                            currentAddPosition++
-                            loadrewarded(
-                                sortedAdsList[currentAddPosition].adscode,
-                                sortedAdsList[currentAddPosition].ads_id
-                            )
-                        }
-                    }
-                }
-            })
-    }
-
-    private fun showRewardedAds(adsId: Int) {
-        if (rewardedInterstitialAd != null) {
-            rewardedInterstitialAd?.show(context as Activity) {
-                isOpen = true
-            }
-            postData(adsId)
-            rewardedInterstitialAd!!.fullScreenContentCallback =
-                object : FullScreenContentCallback() {
-                    override fun onAdDismissedFullScreenContent() {
-
-                    }
-                }
-        }
-    }
 
 
     private fun postData(adsId: Int) {

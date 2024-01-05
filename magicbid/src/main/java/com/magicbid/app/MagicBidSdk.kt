@@ -153,13 +153,13 @@ class MagicBidSdk(private var context: Context) {
 //            view.visibility = View.VISIBLE
             postData(adsId)
             listnerInterface1.onAdLoaded(it)
-            val handler = Handler(Looper.getMainLooper())
-            handler.postDelayed({
-                // Refresh the ad after 5 seconds
-
-                showNativeAds(context,listnerInterface1)
-
-            }, 15000)
+//            val handler = Handler(Looper.getMainLooper())
+//            handler.postDelayed({
+//                // Refresh the ad after 5 seconds
+//
+//                showNativeAds(context,listnerInterface1)
+//
+//            }, 15000)
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 if (loadAdError.code == 3) {

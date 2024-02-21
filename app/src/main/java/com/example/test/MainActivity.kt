@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.admanager.AdManagerAdView
 import com.google.android.gms.ads.nativead.NativeAd
 import com.magicbid.app.AdListnerInterface
 
@@ -28,12 +29,14 @@ class MainActivity : AppCompatActivity() {
         adSize = AdSize(300,500)
 
 
+
         magicBidSdk.adaptiveBannerAD(this,adSize,object : OnInitializationCallback {
-            override fun onLoadedBannerAd(adView: AdView) {
-                banner.addView(adView)
+            override fun onLoadedBannerAd(adManagerAdView: AdManagerAdView) {
+                banner.addView(adManagerAdView)
 
 
             }
+
 
             override fun onFailad(adError: LoadAdError) {
 

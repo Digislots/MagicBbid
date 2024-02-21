@@ -6,20 +6,16 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.View
 import android.widget.LinearLayout
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.admanager.AdManagerAdView
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Response
@@ -28,26 +24,23 @@ import java.net.NetworkInterface
 import java.text.SimpleDateFormat
 import java.util.Date
 
+
 @Suppress("DEPRECATION")
 class MagicBidSdk(private var context: Context) {
     private lateinit var sortedAdsList: MutableList<Adscode>
     private val result = Prefs.getResponseAll(context)
     private var currentAddPosition = 0
-    private var isOpen = false
-    private var rewardedInterstitialAd: RewardedInterstitialAd? = null
-    private var adView: AdView? = null
+
+    private var adManagerAdView: AdManagerAdView? = null
     @SuppressLint("SimpleDateFormat")
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     private val date = Date()
     private val currentdate = formatter.format(date)
-    private var adidinterstital: Int = 0
-    private var magic :Boolean = false
 
 
     private var ipAddress ="0.0.0.0"
     private lateinit var listnerInterface:AdListnerInterface
     private lateinit var onInitializationCallback: OnInitializationCallback
-    private var mInterstitialAd: InterstitialAd? = null
 
     init {
         ApiSingleton.initialize(context)
@@ -70,18 +63,20 @@ class MagicBidSdk(private var context: Context) {
     }
 
     private fun loadadaptiveBannerAdd(activity: Activity, adSize: AdSize, adId: String, adsId: Int,onInitializationCallback1: OnInitializationCallback) {
-        adView = AdView(activity)
-        adView!!.adUnitId = adId
+        adManagerAdView = AdManagerAdView(activity)
+        adManagerAdView!!.adUnitId = adId
         //linearLayout.removeAllViews()
         //linearLayout.addView(adView)
       //  val adSize = getAdSizeaptiveBannerAdd(activity, linearLayout)
-        adView!!.setAdSize(adSize)
-        val adRequest = AdRequest.Builder().build()
-        adView!!.loadAd(adRequest)
-        adView!!.adListener = object : AdListener() {
+        adManagerAdView!!.setAdSize(adSize)
+        val adRequest = AdManagerAdRequest.Builder().build()
+        adManagerAdView!!.loadAd(adRequest)
+        //adManagerAdView!!.loadAd(AdManagerAdRequest.Builder().build())
+
+        adManagerAdView!!.adListener = object : AdListener() {
             override fun onAdLoaded() {
 
-                onInitializationCallback1.onLoadedBannerAd(adView!!)
+                onInitializationCallback1.onLoadedBannerAd(adManagerAdView!!)
 
                 postData(adsId)
 //                val handler = Handler(Looper.getMainLooper())

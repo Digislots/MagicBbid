@@ -14,8 +14,11 @@ import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.VideoOptions
 import com.google.android.gms.ads.admanager.AdManagerAdRequest
 import com.google.android.gms.ads.admanager.AdManagerAdView
+import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Response
@@ -32,43 +35,68 @@ class MagicBidSdk(private var context: Context) {
     private var currentAddPosition = 0
 
     private var adManagerAdView: AdManagerAdView? = null
+
     @SuppressLint("SimpleDateFormat")
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     private val date = Date()
     private val currentdate = formatter.format(date)
 
 
-    private var ipAddress ="0.0.0.0"
-    private lateinit var listnerInterface:AdListnerInterface
+    private var ipAddress = "0.0.0.0"
+    private lateinit var listnerInterface: AdListnerInterface
     private lateinit var onInitializationCallback: OnInitializationCallback
 
     init {
         ApiSingleton.initialize(context)
     }
 
+    private var videoOptions = VideoOptions.Builder()
+        .setStartMuted(true) // You can set other video options as per your requirement
+        .build()
 
-    fun adaptiveBannerAD(activity: Activity,adSize: AdSize,onInitializationCallback1: OnInitializationCallback) {
+    private var  nativeAdOptions = NativeAdOptions.Builder()
+        .setVideoOptions(videoOptions) // Set whether the video should start muted
+        .build()
+
+    fun adaptiveBannerAD(
+        activity: Activity,
+        adSize: AdSize,
+        onInitializationCallback1: OnInitializationCallback
+    ) {
         if (result != null) {
             onInitializationCallback = onInitializationCallback1
             try {
                 val adsList = result.filter { it.ads_type == 1 }
                 sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
                 if (sortedAdsList.isNotEmpty()) {
-                    loadadaptiveBannerAdd(activity,adSize, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,onInitializationCallback)
+                    loadadaptiveBannerAdd(
+                        activity,
+                        adSize,
+                        sortedAdsList[currentAddPosition].adscode,
+                        sortedAdsList[currentAddPosition].ads_id,
+                        onInitializationCallback
+                    )
                 }
             } catch (e: Exception) {
-                Log.d("magick bidSDK",e.toString())
+                Log.d("magick bidSDK", e.toString())
             }
         }
     }
 
-    private fun loadadaptiveBannerAdd(activity: Activity, adSize: AdSize, adId: String, adsId: Int,onInitializationCallback1: OnInitializationCallback) {
+
+    private fun loadadaptiveBannerAdd(
+        activity: Activity,
+        adSize: AdSize,
+        adId: String,
+        adsId: Int,
+        onInitializationCallback1: OnInitializationCallback
+    ) {
+
         adManagerAdView = AdManagerAdView(activity)
         adManagerAdView!!.adUnitId = adId
-        //linearLayout.removeAllViews()
-        //linearLayout.addView(adView)
-      //  val adSize = getAdSizeaptiveBannerAdd(activity, linearLayout)
         adManagerAdView!!.setAdSize(adSize)
+
+        adManagerAdView!!.setVideoOptions(videoOptions)
         val adRequest = AdManagerAdRequest.Builder().build()
         adManagerAdView!!.loadAd(adRequest)
         //adManagerAdView!!.loadAd(AdManagerAdRequest.Builder().build())
@@ -92,13 +120,13 @@ class MagicBidSdk(private var context: Context) {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 if (adError.code == 3) {
                     onInitializationCallback1.onFailad(adError)
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
                         loadadaptiveBannerAdd(
                             activity,
                             adSize,
                             sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id,onInitializationCallback1
+                            sortedAdsList[currentAddPosition].ads_id, onInitializationCallback1
                         )
                     }
 
@@ -106,7 +134,6 @@ class MagicBidSdk(private var context: Context) {
             }
         }
     }
-
 
 
     private fun getAdSizeaptiveBannerAdd(activity: Activity, linearLayout: LinearLayout): AdSize {
@@ -123,68 +150,65 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-
-
-
-    fun showNativeAds(context: Context,listnerInterface1: AdListnerInterface) {
+    fun showNativeAds(context: Context, listnerInterface1: AdListnerInterface) {
         if (result != null) {
             listnerInterface = listnerInterface1
             val adsList = result.filter { it.ads_type == 4 }
             sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
 
             if (sortedAdsList.isNotEmpty()) {
-                loadnativead(context, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id,listnerInterface)
+                loadnativead(
+                    context,
+                    sortedAdsList[currentAddPosition].adscode,
+                    sortedAdsList[currentAddPosition].ads_id,
+                    listnerInterface
+                )
             }
         }
     }
 
-    private fun loadnativead(context: Context, adscode: String, adsId: Int,listnerInterface1: AdListnerInterface) {
+    val videoOption = VideoOptions.Builder()
+        .setStartMuted(true) // Set whether the video should start muted
+        .build()
+
+    private fun loadnativead(
+        context: Context,
+        adscode: String,
+        adsId: Int,
+        listnerInterface1: AdListnerInterface
+    ) {
         val adLoader: AdLoader = AdLoader.Builder(this.context, adscode).forNativeAd {
-//                val styles =
-//                    NativeTemplateStyle.Builder().withMainBackgroundColor(context.resources.getColor(R.color.white)).build()
-//                val template: TemplateView = findViewById(R.id.my_template)
-//                view.setStyles(styles)
-//            view.setNativeAd(it)
-//            view.visibility = View.VISIBLE
+
+
+
+
             postData(adsId)
             listnerInterface1.onAdLoaded(it)
-//            val handler = Handler(Looper.getMainLooper())
-//            handler.postDelayed({
-//                // Refresh the ad after 5 seconds
-//
-//                showNativeAds(context,listnerInterface1)
-//
-//            }, 15000)
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 if (loadAdError.code == 3) {
                     listnerInterface1.onAdFailedToLoad(loadAdError)
 
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
                         loadnativead(
                             context,
                             sortedAdsList[currentAddPosition].adscode,
-                            sortedAdsList[currentAddPosition].ads_id,listnerInterface1
+                            sortedAdsList[currentAddPosition].ads_id, listnerInterface1
                         )
                     }
-
-
-                    //loadnativead(context, view, adscode)
-
 
                 }
             }
 
+        }).withNativeAdOptions(nativeAdOptions)
+            .build()
 
-        }).build()
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
 
-
     private fun postData(adsId: Int) {
-
 
 
         try {
@@ -195,7 +219,7 @@ class MagicBidSdk(private var context: Context) {
                 while (inetAddresses.hasMoreElements()) {
                     val inetAddress = inetAddresses.nextElement()
                     if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                        ipAddress =  inetAddress.hostAddress!!
+                        ipAddress = inetAddress.hostAddress!!
 
                     }
                 }
@@ -210,7 +234,7 @@ class MagicBidSdk(private var context: Context) {
 
 
             ApiUtilities.getApiInterface()
-                .postData(ipAddress, appId, adsId , currentdate)
+                .postData(ipAddress, appId, adsId, currentdate)
                 .enqueue(object : retrofit2.Callback<JsonObject> {
                     override fun onResponse(
                         call: Call<JsonObject>,

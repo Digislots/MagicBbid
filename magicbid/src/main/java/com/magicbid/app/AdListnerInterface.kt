@@ -6,8 +6,16 @@ import com.google.android.gms.ads.nativead.NativeAd
 
 interface AdListnerInterface {
 
-    fun onAdLoaded(it: NativeAd)
-    fun onAdFailedToLoad(var1: LoadAdError)
 
+    fun onAdClicked()
+    fun onAdFailedToLoad(var1: LoadAdError)
+    fun onAdImpression()
+    fun onAdLoaded(boolean: Boolean)
+
+    fun onAdDismissedFullScreenContent()
+
+    fun onAdFailedToShowFullScreenContent(var1: AdError)
+
+    fun onAdShowedFullScreenContent()
 
 }

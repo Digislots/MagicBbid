@@ -1,8 +1,11 @@
 package com.example.test
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
@@ -19,47 +22,79 @@ class MainActivity : AppCompatActivity() {
     private lateinit var banner: LinearLayout
     private lateinit var magicBidSdk: MagicBidSdk
     private lateinit var templateView: TemplateView
-    private lateinit var adSize: AdSize
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         banner = findViewById(R.id.baner)
         templateView = findViewById(R.id.template)
         magicBidSdk = MagicBidSdk(this)
-        adSize = AdSize(300,500)
+        // magicBidSdk.forAllNativeAd()
+           magicBidSdk.forAllInterstitial(object : AdListnerInterface{
+              override fun onAdClicked() {
+                  TODO("Not yet implemented")
+              }
+
+              override fun onAdFailedToLoad(var1: LoadAdError) {
+                  TODO("Not yet implemented")
+              }
+
+              override fun onAdImpression() {
+                  TODO("Not yet implemented")
+              }
+
+              override fun onAdLoaded(boolean: Boolean) {
+                  TODO("Not yet implemented")
+              }
+
+              override fun onAdDismissedFullScreenContent() {
+                  TODO("Not yet implemented")
+              }
+
+              override fun onAdFailedToShowFullScreenContent(var1: AdError) {
+                  TODO("Not yet implemented")
+              }
+
+              override fun onAdShowedFullScreenContent() {
+                  TODO("Not yet implemented")
+              }
+
+          })
 
 
+        val parentView = banner.parent as? ViewGroup
 
-        magicBidSdk.adaptiveBannerAD(this,adSize,object : OnInitializationCallback {
-            override fun onLoadedBannerAd(adManagerAdView: AdManagerAdView) {
-                banner.addView(adManagerAdView)
+// Check if parentView is not null and is a ViewGroup
+        parentView?.let {
+            // Check if the parent view doesn't already contain a banner ad
+            if (!isAdAlreadyLoaded(it)) {
+                // Call the mediation function from magicBidSdk
+                magicBidSdk.allForBannerAd(it, banner,object :OnInitializationCallback{
+                    override fun onLoadedBannerAd(adManagerAdView: AdManagerAdView) {
+                        TODO("Not yet implemented")
+                    }
 
+                    override fun onFailad(adError: LoadAdError) {
+                        TODO("Not yet implemented")
+                    }
 
+                })
             }
-
-
-            override fun onFailad(adError: LoadAdError) {
-
-            }
-
-
-        })
-
-//        magicBidSdk.showNativeAds(this,object :AdListnerInterface{
-//            override fun onAdLoaded(it: NativeAd) {
-//
-//                templateView.setNativeAd(it)
-//                templateView.visibility = View.VISIBLE
-//
-//            }
-//
-//            override fun onAdFailedToLoad(var1: LoadAdError) {
-//
-//            }
-//
-//
-//        })
+        } ?: run {
+            // Handle case when parentView is null or not a ViewGroup
+            Log.e("YourTag", "Parent view not found or is not a ViewGroup")
+        }
 
     }
 
+    private fun isAdAlreadyLoaded(parentView: ViewGroup): Boolean {
+        for (i in 0 until parentView.childCount) {
+            val child = parentView.getChildAt(i)
+            if (child is AdView) {
+                // An ad is already loaded in the parent view
+                return true
+            }
+        }
+        // No ad found in the parent view
+        return false
+    }
 }

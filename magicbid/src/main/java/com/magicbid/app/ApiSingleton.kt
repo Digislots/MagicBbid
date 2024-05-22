@@ -10,10 +10,34 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
 import com.google.android.gms.ads.MobileAds
+import com.inmobi.sdk.InMobiSdk
+import com.inmobi.sdk.InMobiSdk.LogLevel
+import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
 
+
 object ApiSingleton {
+
+
+    @SuppressLint("Range")
+    fun initInMobi(context: Context ){
+        val consentObject = JSONObject()
+        try {
+            consentObject.put("gdpr", "1") // Provide appropriate consent value
+            consentObject.put("gdpr_consent_available", true)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+        InMobiSdk.init(context, "1714870574047", consentObject){
+
+        }
+        InMobiSdk.setLogLevel(InMobiSdk.LogLevel.DEBUG)
+    }
+
+
 
     fun initialize(context: Context ) {
         MobileAds.initialize(context) { initializationStatus ->

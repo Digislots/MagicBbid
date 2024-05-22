@@ -1,3 +1,4 @@
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -13,7 +14,7 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
-
+        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,6 +27,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -35,7 +37,9 @@ android {
     }
     buildFeatures {
         viewBinding  = true
+
     }
+
 }
 
 dependencies {
@@ -66,5 +70,20 @@ dependencies {
 
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation ("androidx.lifecycle:lifecycle-process:2.3.1")
+     implementation ("androidx.core:core-ktx:1.5.0")
+    implementation ("org.jetbrains.kotlin:kotlin-reflect:1.5.30")
+    implementation ("com.inmobi.omsdk:inmobi-omsdk:1.3.17.1")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+     implementation ("androidx.browser:browser:1.4.0")
+    implementation ("com.squareup.picasso:picasso:2.8")
+    implementation ("androidx.viewpager:viewpager:1.0.0")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    implementation ("com.google.android.gms:play-services-appset:16.0.2")//optional dependency for better targeting
+    implementation ("com.google.android.gms:play-services-tasks:18.0.2") //optional dependency for better targeting
+    implementation ("androidx.multidex:multidex:2.0.1")
+
+    implementation ("com.inmobi.monetization:inmobi-ads:10.1.3")
+    implementation ("com.google.android.gms:play-services-ads-identifier:18.0.1")
+
 
 }

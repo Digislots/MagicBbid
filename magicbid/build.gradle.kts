@@ -66,6 +66,9 @@ dependencies {
 
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation ("androidx.lifecycle:lifecycle-process:2.3.1")
+    implementation ("com.inmobi.monetization:inmobi-ads:10.1.3")
+    implementation ("com.google.android.gms:play-services-ads-identifier:18.0.1")
+
 
     val multidex_version = "2.0.1"
     implementation("androidx.multidex:multidex:$multidex_version")
@@ -92,4 +95,6 @@ publishing {
         */
         }
     }
+
+
 }

@@ -10,6 +10,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven(url = "https://dl.bintray.com/inmobi/maven")
+
     }
 }
 

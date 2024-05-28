@@ -264,206 +264,136 @@ class MagicBidSdk(private var context: Context) {
     }
 
 
-    fun forAllInterstitial(listnerInterface1: AdListnerInterface) {
-        this.listnerInterface = listnerInterface1
+    fun forAllInterstitial(listenerInterface: AdListnerInterface) {
+        this.listnerInterface = listenerInterface
 
-        interstitialAd =
-            InMobiInterstitial(context, 1715196644321L, object : InterstitialAdEventListener() {
-                override fun onAdLoadSucceeded(ad: InMobiInterstitial) {
-                    Log.d("InMobiAd", "Ad load succeeded")
-                    // Show the ad
-                    if (ad.isReady) {
-                        ad.show()
-                    }
-                }
+        interstitialAd = InMobiInterstitial(context, 1715196644321L, object : InterstitialAdEventListener() {
+            override fun onAdLoadSucceeded(ad: InMobiInterstitial) {
+                Log.d("InMobiAd", "Ad load succeeded")
+//                if (ad.isReady) {
+//                    ad.show()
+//                }
+            }
 
-                override fun onAdLoadFailed(ad: InMobiInterstitial, status: InMobiAdRequestStatus) {
-                    Log.d("InMobiAd", "onAdLoadFailed")
-                    showinterStitalad(object :AdListnerInterface{
-                        override fun onAdClicked() {
-                            TODO("Not yet implemented")
-                        }
+            override fun onAdLoadFailed(ad: InMobiInterstitial, status: InMobiAdRequestStatus) {
+                Log.d("InMobiAd", "onAdLoadFailed")
+                showInterstitialAd(listenerInterface)
+            }
 
-                        override fun onAdFailedToLoad(var1: LoadAdError) {
-                            TODO("Not yet implemented")
-                        }
+            override fun onAdDismissed(ad: InMobiInterstitial) {
+                Log.d("InMobiAd", "Ad dismissed")
+            }
 
-                        override fun onAdImpression() {
-                            TODO("Not yet implemented")
-                        }
+            override fun onAdDisplayed(ad: InMobiInterstitial) {
+                Log.d("InMobiAd", "Ad displayed")
+            }
 
-                        override fun onAdLoaded(boolean: Boolean) {
-                            TODO("Not yet implemented")
-                        }
+            override fun onUserLeftApplication(ad: InMobiInterstitial) {
+                Log.d("InMobiAd", "User left application")
+            }
 
-                        override fun onAdDismissedFullScreenContent() {
-                            TODO("Not yet implemented")
-                        }
+            override fun onAdImpression(ad: InMobiInterstitial) {
+                Log.d("InMobiAd", "Ad impression")
+            }
 
-                        override fun onAdFailedToShowFullScreenContent(var1: AdError) {
-                            TODO("Not yet implemented")
-                        }
+            override fun onAdWillDisplay(ad: InMobiInterstitial) {
+                Log.d("InMobiAd", "Ad will display")
+            }
+        })
 
-                        override fun onAdShowedFullScreenContent() {
-                            TODO("Not yet implemented")
-                        }
-
-                    })
-
-                }
-
-                override fun onAdDismissed(ad: InMobiInterstitial) {
-
-                }
-
-                override fun onAdDisplayed(ad: InMobiInterstitial) {
-
-                }
-
-
-                override fun onUserLeftApplication(ad: InMobiInterstitial) {
-
-                }
-
-                override fun onAdImpression(ad: InMobiInterstitial) {
-                    Log.d("InMobiAd", "Ad impression")
-
-
-                }
-
-                override fun onAdWillDisplay(ad: InMobiInterstitial) {
-                    Log.d("InMobiAd", "Ad will display")
-                }
-            })
-
-        // Load the interstitial ad
         interstitialAd.load()
     }
 
-
-    private fun showinterStitalad(listnerInterface1: AdListnerInterface) {
-        this.listnerInterface = listnerInterface1
-        if (result != null) {
-            val adsList = result.filter { it.ads_type == 3 }
-            sortedAdsList = adsList.sortedByDescending { it.cpm }.toMutableList()
+    private fun showInterstitialAd(listenerInterface: AdListnerInterface) {
+        this.listnerInterface = listenerInterface
+        result?.let {
+            val adsList = it.filter { ad -> ad.ads_type == 3 }
+            sortedAdsList = adsList.sortedByDescending { ad -> ad.cpm }.toMutableList()
 
             if (sortedAdsList.isNotEmpty()) {
-
-                loadinterstitalad(
-                    sortedAdsList[currentAddPosition].adscode,
-                    this.listnerInterface,
-                    sortedAdsList[currentAddPosition].ads_id
-                )
+                loadInterstitialAd(sortedAdsList[currentAddPosition].adscode, listenerInterface, sortedAdsList[currentAddPosition].ads_id)
             }
         }
     }
 
-
-    private fun loadinterstitalad(
-        adscode: String,
-        listnerInterface: AdListnerInterface,
-        adsId: Int
-    ) {
-
-
+    private fun loadInterstitialAd(adscode: String, listenerInterface: AdListnerInterface, adsId: Int) {
         val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(
-            context,
-            adscode,
-            adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    mInterstitialAd = null
-                    listnerInterface.onAdFailedToLoad(adError)
-                    if (adError.code == 3) {
-                        // currentAddPosition++
-                        adFailedCount++
-                        Log.d("adFailedCount", "Ad loading failed $adFailedCount times")
-                        if (sortedAdsList.size - 1 > currentAddPosition) {
-                            currentAddPosition++
-                            loadinterstitalad(
-                                sortedAdsList[currentAddPosition].adscode,
-                                listnerInterface,
-                                sortedAdsList[currentAddPosition].ads_id
-                            )
-                        } else {
+        InterstitialAd.load(context, adscode, adRequest, object : InterstitialAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                mInterstitialAd = null
+                listenerInterface.onAdFailedToLoad(adError)
+                handleAdLoadFailure(adError, listenerInterface)
+            }
 
-                            if (!magic) {
-                                magic = true
-                                currentAddPosition = 0
-                                loadinterstitalad(
-                                    sortedAdsList[currentAddPosition].adscode,
-                                    listnerInterface,
-                                    sortedAdsList[currentAddPosition].ads_id
-                                )
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                mInterstitialAd = interstitialAd
+                adidinterstital = adsId
 
-                            }
+                interstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdClicked() {
+                        listenerInterface.onAdClicked()
+                    }
 
+                    override fun onAdDismissedFullScreenContent() {
+                        mInterstitialAd = null
+                        listenerInterface.onAdDismissedFullScreenContent()
+                    }
 
-                        }
+                    override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                        mInterstitialAd = null
+                        listenerInterface.onAdFailedToShowFullScreenContent(adError)
+                    }
 
+                    override fun onAdImpression() {
+                        listenerInterface.onAdImpression()
+                    }
 
+                    override fun onAdShowedFullScreenContent() {
+                        listenerInterface.onAdShowedFullScreenContent()
                     }
                 }
 
-
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    mInterstitialAd = interstitialAd
-
-//                    if (mInterstitialAd != null) {
-//                        mInterstitialAd?.show(context as Activity)
-//
-//                    }
-                    adidinterstital = adsId
-
-                    mInterstitialAd?.fullScreenContentCallback =
-                        object : FullScreenContentCallback() {
-                            override fun onAdClicked() {
-                                listnerInterface.onAdClicked()
-                            }
-
-                            override fun onAdDismissedFullScreenContent() {
-                                mInterstitialAd = null
-                                listnerInterface.onAdDismissedFullScreenContent()
-
-                            }
-
-                            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                                mInterstitialAd = null
-                                listnerInterface.onAdFailedToShowFullScreenContent(adError)
-                            }
-
-                            override fun onAdImpression() {
-                                listnerInterface.onAdImpression()
-                            }
-
-                            override fun onAdShowedFullScreenContent() {
-                                listnerInterface.onAdShowedFullScreenContent()
-                            }
-                        }
-
-
-                    listnerInterface.onAdLoaded(boolean = true)
-
-
-                }
-
-            })
-
-
+                listenerInterface.onAdLoaded(true)
+            }
+        })
     }
 
-    fun setAutoAdCacheing(): Boolean {
+    private fun handleAdLoadFailure(adError: LoadAdError, listenerInterface: AdListnerInterface) {
+        if (adError.code == 3) {
+            adFailedCount++
+            Log.d("adFailedCount", "Ad loading failed $adFailedCount times")
+            if (sortedAdsList.size - 1 > currentAddPosition) {
+                currentAddPosition++
+                loadInterstitialAd(sortedAdsList[currentAddPosition].adscode, listenerInterface, sortedAdsList[currentAddPosition].ads_id)
+            } else if (!magic) {
+                magic = true
+                currentAddPosition = 0
+                loadInterstitialAd(sortedAdsList[currentAddPosition].adscode, listenerInterface, sortedAdsList[currentAddPosition].ads_id)
+            }
+        }
+    }
+
+    fun setAutoAdCaching(): Boolean {
         return mInterstitialAd != null
     }
 
+
+
     fun showInterstitialAds() {
-
-        if (mInterstitialAd != null) {
+        if (interstitialAd.isReady) {
+            interstitialAd.show()
+        } else if (mInterstitialAd != null) {
             mInterstitialAd!!.show(context as Activity)
-
         }
     }
+
+//    fun showInterstitialAds() {
+//
+//        if (mInterstitialAd != null) {
+//            mInterstitialAd!!.show(context as Activity)
+//
+//        }
+//    }
 
 
 //

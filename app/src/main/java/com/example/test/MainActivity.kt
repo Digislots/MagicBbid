@@ -31,58 +31,60 @@ class MainActivity : AppCompatActivity() {
         // magicBidSdk.forAllNativeAd()
            magicBidSdk.forAllInterstitial(object : AdListnerInterface{
               override fun onAdClicked() {
-                  TODO("Not yet implemented")
+
               }
 
               override fun onAdFailedToLoad(var1: LoadAdError) {
-                  TODO("Not yet implemented")
+                  Log.e("InterstitialAd___", "onAdFailedToLoad")
               }
 
               override fun onAdImpression() {
-                  TODO("Not yet implemented")
+                  Log.e("Interstitial___", "onAdImpression")
               }
 
               override fun onAdLoaded(boolean: Boolean) {
-                  TODO("Not yet implemented")
+                  Log.e("Interstitial___", "onAdLoaded")
               }
 
               override fun onAdDismissedFullScreenContent() {
-                  TODO("Not yet implemented")
+
               }
 
               override fun onAdFailedToShowFullScreenContent(var1: AdError) {
-                  TODO("Not yet implemented")
+
               }
 
               override fun onAdShowedFullScreenContent() {
-                  TODO("Not yet implemented")
+
               }
 
           })
+        magicBidSdk.setAutoAdCaching()
+        magicBidSdk.showInterstitialAds()
 
-
-        val parentView = banner.parent as? ViewGroup
-
-// Check if parentView is not null and is a ViewGroup
-        parentView?.let {
-            // Check if the parent view doesn't already contain a banner ad
-            if (!isAdAlreadyLoaded(it)) {
-                // Call the mediation function from magicBidSdk
-                magicBidSdk.allForBannerAd(it, banner,object :OnInitializationCallback{
-                    override fun onLoadedBannerAd(adManagerAdView: AdManagerAdView) {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onFailad(adError: LoadAdError) {
-                        TODO("Not yet implemented")
-                    }
-
-                })
-            }
-        } ?: run {
-            // Handle case when parentView is null or not a ViewGroup
-            Log.e("YourTag", "Parent view not found or is not a ViewGroup")
-        }
+//
+//        val parentView = banner.parent as? ViewGroup
+////
+////// Check if parentView is not null and is a ViewGroup
+//        parentView?.let {
+//            // Check if the parent view doesn't already contain a banner ad
+//            if (!isAdAlreadyLoaded(it)) {
+//                // Call the mediation function from magicBidSdk
+//                magicBidSdk.allForBannerAd(it, banner,object :OnInitializationCallback{
+//                    override fun onLoadedBannerAd(adManagerAdView: AdManagerAdView) {
+//                        Log.e("bannerAd___", "onLoadedBannerAd")
+//                    }
+//
+//                    override fun onFailad(adError: LoadAdError) {
+//                        Log.e("bannerAd___", "onFailad")
+//                    }
+//
+//                })
+//            }
+//        } ?: run {
+//            // Handle case when parentView is null or not a ViewGroup
+//            Log.e("YourTag", "Parent view not found or is not a ViewGroup")
+//        }
 
     }
 

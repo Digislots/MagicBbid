@@ -408,20 +408,25 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
-
     fun showInterstitialAds() {
         Log.d("AdDisplay", "Attempting to show interstitial ad")
         when {
-            (allInOneInterstitial as InMobiInterstitial).isReady -> {
-                Log.d("InMobiAd", "InMobi interstitial ad is ready, showing ad")
-                (allInOneInterstitial as InMobiInterstitial).show()
+            (allInOneInterstitial is InMobiInterstitial)->{
+                when{
+                    (allInOneInterstitial as InMobiInterstitial).isReady -> {
+                        Log.d("InMobiAd", "InMobi interstitial ad is ready, showing ad")
+                        (allInOneInterstitial as InMobiInterstitial).show()
+                    }
+                }
             }
-
-            (allInOneInterstitial as InterstitialAd) != null -> {
-                Log.d("AdMobAd", "AdMob interstitial ad is ready, showing ad")
-                (allInOneInterstitial as InterstitialAd).show(context as Activity)
+            (allInOneInterstitial is InterstitialAd)->{
+                when{
+                    (allInOneInterstitial as InterstitialAd) != null -> {
+                        Log.d("AdMobAd", "AdMob interstitial ad is ready, showing ad")
+                        (allInOneInterstitial as InterstitialAd).show(context as Activity)
+                    }
+                }
             }
-
             else -> {
                 Log.d("AdDisplay", "No interstitial ad is ready to be shown")
             }
@@ -429,15 +434,27 @@ class MagicBidSdk(private var context: Context) {
     }
 
     fun adIsLoaded(): Boolean {
-        return if ((allInOneInterstitial as InMobiInterstitial).isReady) {
-            true
-        } else if ((allInOneInterstitial as InterstitialAd) != null) {
-            true
-        } else {
-            false
+        var returnValue = false
+        if (allInOneInterstitial is InMobiInterstitial){
+            if ((allInOneInterstitial as InMobiInterstitial).isReady) {
+                returnValue = true
+            }
         }
-
+        else if(allInOneInterstitial is InterstitialAd){
+            if ((allInOneInterstitial as InterstitialAd) != null) {
+                returnValue =  true
+            }
+        }else{
+            returnValue = false
+        }
+        return returnValue
     }
+
+
+
+
+
+
 
 //    fun showInterstitialAds() {
 //        if (interstitialAd.isReady) {

@@ -3,12 +3,6 @@ package com.magicbid.app
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Color
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
@@ -57,18 +51,27 @@ class MagicBidSdk(private var context: Context) {
     var adFailedCount = 0
     private lateinit var onInitializationCallback: OnInitializationCallback
     private var adManagerAdView: AdManagerAdView? = null
-    private lateinit var interstitialAd: InMobiInterstitial
     private var ipAddress = "0.0.0.0"
     private lateinit var listnerInterface: AdListnerInterface
     var mInterstitialAd: InterstitialAd? = null
     private lateinit var inMobiNative: InMobiNative
+
+    var allInOneInterstitial: Any? = null
+    //private var inMobiInterstitial: InMobiInterstitial? = null
+    //private var admobInterstitialAd: InterstitialAd? = null
+
+
     init {
         ApiSingleton.initialize(context)
         ApiSingleton.initInMobi(context)
     }
 
 
-    fun allForBannerAd(adContainer: ViewGroup, parentView: ViewGroup, onInitializationCallback1: OnInitializationCallback) {
+    fun allForBannerAd(
+        adContainer: ViewGroup,
+        parentView: ViewGroup,
+        onInitializationCallback1: OnInitializationCallback
+    ) {
 
         onInitializationCallback = onInitializationCallback1
         // 1714265823419
@@ -228,7 +231,6 @@ class MagicBidSdk(private var context: Context) {
                 onInitializationCallback1.onLoadedBannerAd(adManagerAdView!!)
 
 
-
             }
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -267,41 +269,51 @@ class MagicBidSdk(private var context: Context) {
     fun forAllInterstitial(listenerInterface: AdListnerInterface) {
         this.listnerInterface = listenerInterface
 
-        interstitialAd = InMobiInterstitial(context, 1715196644321L, object : InterstitialAdEventListener() {
+        val adEventListener = object : InterstitialAdEventListener() {
             override fun onAdLoadSucceeded(ad: InMobiInterstitial) {
-                Log.d("InMobiAd", "Ad load succeeded")
-//                if (ad.isReady) {
-//                    ad.show()
-//                }
+
+                //inMobiInterstitial = ad
+                listenerInterface.onAdLoaded(true)
+
+
+                Log.d("InMobiAd", "InMobi ad load succeeded")
+//               if (ad.isReady){
+//                   ad.show()
+//               }
             }
 
             override fun onAdLoadFailed(ad: InMobiInterstitial, status: InMobiAdRequestStatus) {
-                Log.d("InMobiAd", "onAdLoadFailed")
+                Log.d("InMobiAd", "InMobi ad load failed: ${status.message}")
+                listenerInterface.onAdFailedToLoad(status.message)
                 showInterstitialAd(listenerInterface)
             }
 
             override fun onAdDismissed(ad: InMobiInterstitial) {
-                Log.d("InMobiAd", "Ad dismissed")
+                Log.d("InMobiAd", "InMobi ad dismissed")
+                listenerInterface.onAdDismissedFullScreenContent()
             }
 
             override fun onAdDisplayed(ad: InMobiInterstitial) {
-                Log.d("InMobiAd", "Ad displayed")
+                Log.d("InMobiAd", "InMobi ad displayed")
             }
 
             override fun onUserLeftApplication(ad: InMobiInterstitial) {
-                Log.d("InMobiAd", "User left application")
+                Log.d("InMobiAd", "InMobi user left application")
             }
 
             override fun onAdImpression(ad: InMobiInterstitial) {
-                Log.d("InMobiAd", "Ad impression")
+                Log.d("InMobiAd", "InMobi ad impression")
             }
 
             override fun onAdWillDisplay(ad: InMobiInterstitial) {
-                Log.d("InMobiAd", "Ad will display")
+                Log.d("InMobiAd", "InMobi ad will display")
             }
-        })
+        }
 
-        interstitialAd.load()
+        allInOneInterstitial = InMobiInterstitial(context, 1715196644321L, adEventListener)/*.apply {
+            load()
+        }*/
+        (allInOneInterstitial as InMobiInterstitial).load()
     }
 
     private fun showInterstitialAd(listenerInterface: AdListnerInterface) {
@@ -311,37 +323,52 @@ class MagicBidSdk(private var context: Context) {
             sortedAdsList = adsList.sortedByDescending { ad -> ad.cpm }.toMutableList()
 
             if (sortedAdsList.isNotEmpty()) {
-                loadInterstitialAd(sortedAdsList[currentAddPosition].adscode, listenerInterface, sortedAdsList[currentAddPosition].ads_id)
+                loadAdMobInterstitialAd(
+                    sortedAdsList[currentAddPosition].adscode,
+                    listenerInterface,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             }
         }
     }
 
-    private fun loadInterstitialAd(adscode: String, listenerInterface: AdListnerInterface, adsId: Int) {
+    private fun loadAdMobInterstitialAd(
+        adscode: String,
+        listenerInterface: AdListnerInterface,
+        adsId: Int
+    ) {
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(context, adscode, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                mInterstitialAd = null
-                listenerInterface.onAdFailedToLoad(adError)
+                Log.d("AdMobAd", "AdMob ad failed to load: ${adError.message}")
+                allInOneInterstitial = null
+                listenerInterface.onAdFailedToLoad(adError.message)
                 handleAdLoadFailure(adError, listenerInterface)
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                mInterstitialAd = interstitialAd
-                adidinterstital = adsId
+                Log.d("AdMobAd", "AdMob ad loaded")
+                allInOneInterstitial = interstitialAd
 
+                //  admobInterstitialAd?.show(context as Activity)
                 interstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
                     override fun onAdClicked() {
                         listenerInterface.onAdClicked()
                     }
 
                     override fun onAdDismissedFullScreenContent() {
-                        mInterstitialAd = null
+                        Log.d("AdMobAd", "AdMob ad dismissed full screen content")
+                        allInOneInterstitial = null
                         listenerInterface.onAdDismissedFullScreenContent()
                     }
 
                     override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                        mInterstitialAd = null
-                        listenerInterface.onAdFailedToShowFullScreenContent(adError)
+                        Log.d(
+                            "AdMobAd",
+                            "AdMob ad failed to show full screen content: ${adError.message}"
+                        )
+                        allInOneInterstitial = null
+                        listenerInterface.onAdFailedToShowFullScreenContent(adError.message)
                     }
 
                     override fun onAdImpression() {
@@ -359,33 +386,66 @@ class MagicBidSdk(private var context: Context) {
     }
 
     private fun handleAdLoadFailure(adError: LoadAdError, listenerInterface: AdListnerInterface) {
-        if (adError.code == 3) {
+        if (adError.code == 3) {  // Error code 3 typically indicates no ad inventory available
             adFailedCount++
-            Log.d("adFailedCount", "Ad loading failed $adFailedCount times")
+            Log.d("AdLoadFailure", "Ad loading failed $adFailedCount times")
             if (sortedAdsList.size - 1 > currentAddPosition) {
                 currentAddPosition++
-                loadInterstitialAd(sortedAdsList[currentAddPosition].adscode, listenerInterface, sortedAdsList[currentAddPosition].ads_id)
+                loadAdMobInterstitialAd(
+                    sortedAdsList[currentAddPosition].adscode,
+                    listenerInterface,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             } else if (!magic) {
                 magic = true
                 currentAddPosition = 0
-                loadInterstitialAd(sortedAdsList[currentAddPosition].adscode, listenerInterface, sortedAdsList[currentAddPosition].ads_id)
+                loadAdMobInterstitialAd(
+                    sortedAdsList[currentAddPosition].adscode,
+                    listenerInterface,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             }
         }
     }
 
-    fun setAutoAdCaching(): Boolean {
-        return mInterstitialAd != null
-    }
-
-
 
     fun showInterstitialAds() {
-        if (interstitialAd.isReady) {
-            interstitialAd.show()
-        } else if (mInterstitialAd != null) {
-            mInterstitialAd!!.show(context as Activity)
+        Log.d("AdDisplay", "Attempting to show interstitial ad")
+        when {
+            (allInOneInterstitial as InMobiInterstitial).isReady -> {
+                Log.d("InMobiAd", "InMobi interstitial ad is ready, showing ad")
+                (allInOneInterstitial as InMobiInterstitial).show()
+            }
+
+            (allInOneInterstitial as InterstitialAd) != null -> {
+                Log.d("AdMobAd", "AdMob interstitial ad is ready, showing ad")
+                (allInOneInterstitial as InterstitialAd).show(context as Activity)
+            }
+
+            else -> {
+                Log.d("AdDisplay", "No interstitial ad is ready to be shown")
+            }
         }
     }
+
+    fun adIsLoaded(): Boolean {
+        return if ((allInOneInterstitial as InMobiInterstitial).isReady) {
+            true
+        } else if ((allInOneInterstitial as InterstitialAd) != null) {
+            true
+        } else {
+            false
+        }
+
+    }
+
+//    fun showInterstitialAds() {
+//        if (interstitialAd.isReady) {
+//            interstitialAd.show()
+//        } else if (mInterstitialAd != null) {
+//            mInterstitialAd!!.show(context as Activity)
+//        }
+//    }
 
 //    fun showInterstitialAds() {
 //
@@ -396,7 +456,7 @@ class MagicBidSdk(private var context: Context) {
 //    }
 
 
-//
+    //
     fun showNativeAds(context: Context, view: TemplateView) {
         if (result != null) {
             val adsList = result.filter { it.ads_type == 4 }
@@ -405,7 +465,12 @@ class MagicBidSdk(private var context: Context) {
             Log.d("sortedAdsList", sortedAdsList.toString())
 
             if (sortedAdsList.isNotEmpty()) {
-                loadnativead(context, view, sortedAdsList[currentAddPosition].adscode,sortedAdsList[currentAddPosition].ads_id)
+                loadnativead(
+                    context,
+                    view,
+                    sortedAdsList[currentAddPosition].adscode,
+                    sortedAdsList[currentAddPosition].ads_id
+                )
             }
         }
     }
@@ -426,7 +491,7 @@ class MagicBidSdk(private var context: Context) {
                 Log.d("loadnativead", sortedAdsList[currentAddPosition].adscode)
                 if (loadAdError.code == 3) {
 
-                    if (sortedAdsList.size-1 > currentAddPosition){
+                    if (sortedAdsList.size - 1 > currentAddPosition) {
                         currentAddPosition++
                         loadnativead(
                             context,
@@ -501,9 +566,6 @@ class MagicBidSdk(private var context: Context) {
                 }
         }
     }
-
-
-
 
 
 }

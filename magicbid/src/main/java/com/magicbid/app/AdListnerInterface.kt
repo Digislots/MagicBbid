@@ -8,13 +8,13 @@ interface AdListnerInterface {
 
 
     fun onAdClicked()
-    fun onAdFailedToLoad(var1: LoadAdError)
+    fun onAdFailedToLoad(var1: String)
     fun onAdImpression()
     fun onAdLoaded(boolean: Boolean)
 
     fun onAdDismissedFullScreenContent()
 
-    fun onAdFailedToShowFullScreenContent(var1: AdError)
+    fun onAdFailedToShowFullScreenContent(var1: String)
 
     fun onAdShowedFullScreenContent()
 

@@ -82,6 +82,7 @@ class MagicBidSdk(private var context: Context) {
             150
         )
 
+        adContainer.removeAllViews()
         adContainer.addView(bannerAdView)
         bannerAdView.setBannerSize(320, 50)
         bannerAdView.load()
@@ -164,8 +165,9 @@ class MagicBidSdk(private var context: Context) {
                         handleAdLoadingFailure(adError)
                     }
                 })
-                parentView.addView(layout)
-
+                adContainer.removeAllViews()
+                adContainer.addView(layout)
+                //parentView.addView(layout)
 
             }
 
@@ -229,8 +231,6 @@ class MagicBidSdk(private var context: Context) {
             override fun onAdLoaded() {
 
                 onInitializationCallback1.onLoadedBannerAd(adManagerAdView!!)
-
-
             }
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -408,6 +408,7 @@ class MagicBidSdk(private var context: Context) {
         }
     }
 
+
     fun showInterstitialAds() {
         Log.d("AdDisplay", "Attempting to show interstitial ad")
         when {
@@ -449,12 +450,6 @@ class MagicBidSdk(private var context: Context) {
         }
         return returnValue
     }
-
-
-
-
-
-
 
 //    fun showInterstitialAds() {
 //        if (interstitialAd.isReady) {
